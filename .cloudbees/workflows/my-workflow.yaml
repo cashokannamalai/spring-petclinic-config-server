@@ -1,13 +1,44 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-name: My workflow
+name: My automation
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 jobs:
-  build:
+  Checkout:
     steps:
-      - name: Say hello
-        uses: docker://golang:1.20.3-alpine3.17
-        shell: sh
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+  Build:
+    needs: Checkout
+    steps:
+      - name: Configure git
+        uses: docker://alpine/git:latest
         run: |
-          echo "hello world"
+          git config --global --add safe.directory /cloudbees/workspace
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+        
+      - name: Build 
+        uses: docker://maven:3-eclipse-temurin-17
+        run: |
+          mvn clean install 
+
+  UnitTest:
+    needs: Build
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Publish test results
+        uses: cloudbees-io/publish-test-results@v1
+        with:
+          test-type: JUnit
+          folder-name: target/surefire-reports
+
+      - name: Build12 
+        uses: docker://maven:3-eclipse-temurin-17
+        run: |
+          ls target/surefire-reports
