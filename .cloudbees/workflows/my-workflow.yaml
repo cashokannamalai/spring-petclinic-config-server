@@ -10,7 +10,6 @@ jobs:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-
   Build:
     needs: Checkout
     steps:
@@ -20,25 +19,26 @@ jobs:
           git config --global --add safe.directory /cloudbees/workspace
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-        
-      - name: Build 
+      - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install 
 
-  UnitTest:
-    needs: Build
+  ArtifactPublish:
+    needs: [Build]
     steps:
-      - name: Checkout
+      - uses: docker://alpine/git:latest
+        run: |
+          git config --global --add safe.directory /cloudbees/workspace
+          
+      - name: checkout
         uses: cloudbees-io/checkout@v1
 
-      - name: Publish test results
-        uses: cloudbees-io/publish-test-results@v1
-        with:
-          test-type: JUnit
-          folder-name: target/surefire-reports
-
-      - name: Build12 
+      - name: Publish to Nexus
         uses: docker://maven:3-eclipse-temurin-17
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: |
-          ls target/surefire-reports
+          mvn deploy  \
+            -DaltDeploymentRepository=nexus::default::https://${NEXUS_USERNAME}:${NEXUS_PASSWORD}@nexus.cb-demos.io/repository/Petclinic/
