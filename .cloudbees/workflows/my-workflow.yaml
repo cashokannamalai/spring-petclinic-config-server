@@ -42,3 +42,4 @@ jobs:
         run: |
           mvn deploy  \
             -DaltDeploymentRepository=nexus::default::https://${NEXUS_USERNAME}:${NEXUS_PASSWORD}@nexus.cb-demos.io/repository/Petclinic/
+            
