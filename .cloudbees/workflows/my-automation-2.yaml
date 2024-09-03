@@ -4,7 +4,7 @@ name: My automation
 on:
   push:
     branches:
-      - main
+      - shozab
   workflow_dispatch:
 jobs:
   Checkout:
