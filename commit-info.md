@@ -1,6 +1,6 @@
 ## Commit Information
-- Commit ID: 7e36074cd2e5c87fb0545245ecfa2ec3a1952825
-- Commit Message:           echo "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
+- Commit ID: 8f3116584e12c31c3dc577b1fd3bed1660f43a2c
+- Commit Message: cat /cloudbees/step-output-3028136180/mvn_test_stdio
 ## SonarQube Metrics
 | Severity | Count |
 |----------|-------|
