@@ -27,14 +27,14 @@ jobs:
   UnitTest:
     needs: Build
     outputs:
-      unitTestResults: test
+      unitTestResults: test 
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
       - name: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
         run: |
-          mvn test 
+          mvn test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
   StaticAnalysis:
     steps:
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
