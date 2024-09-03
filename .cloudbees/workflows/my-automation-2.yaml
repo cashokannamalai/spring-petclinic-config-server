@@ -32,6 +32,7 @@ jobs:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
       - name: RunUnitTest
+        id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
