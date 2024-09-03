@@ -1,42 +1,49 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
-
 on:
   push:
     branches:
       - main
-
 jobs:
   Checkout:
     steps:
-      - name: checkout
+      - name: Checkout
         uses: cloudbees-io/checkout@v1
   Build:
     needs: Checkout
     steps:
-      - uses: docker://alpine/git:latest
+      - name: Configure git
+        uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
-      - name: checkout
+      - name: Checkout
         uses: cloudbees-io/checkout@v1
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
-          mvn clean install -DskipTests=true
-  SonarAnalysis:
+          mvn clean install
+  UnitTest:
     needs: Build
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+      - name: Unit Test
+        uses: docker://maven:3-eclipse-temurin-17
+        run: |
+          mvn test
+  StaticAnalysis:
     steps:
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
         name: Scan
         kind: scan
         with:
           server-url: https://sonarqube.cb-demos.io
-          username: admin
-          password: admin123
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
           language: Java
       - uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
-        name: Scan 2
+        name: Scan with Java
         kind: scan
         with:
           language: JAVA
@@ -49,107 +56,145 @@ jobs:
         name: Scan GP
         with:
           project-key: config-server
-          token: 20e414018be1508e8a472229e7ec07da1a13cfa1
-  CreateEC2Instance:
-    needs:
-      - SonarAnalysis
+          token: ${{ secrets.token }}
+      - name: Fetch SonarQube Issues
+        uses: docker://alpine/git:latest
+        run: |
+          apk add --no-cache curl jq
+          curl -u ${{ secrets.username }}:${{ secrets.password }} \
+          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR" \
+          -o sonar-issues.json
+          BLOCKER_COUNT=$(jq '[.issues[] | select(.severity=="BLOCKER")] | length' sonar-issues.json)
+          CRITICAL_COUNT=$(jq '[.issues[] | select(.severity=="CRITICAL")] | length' sonar-issues.json)
+          MAJOR_COUNT=$(jq '[.issues[] | select(.severity=="MAJOR")] | length' sonar-issues.json)
+          echo "| Severity | Count |"
+          echo "|----------|-------|"
+          echo "| Blocker  | $BLOCKER_COUNT |"
+          echo "| Critical | $CRITICAL_COUNT |"
+          echo "| Major    | $MAJOR_COUNT |"
+  ArtifactPublish:
+    needs: UnitTest
     steps:
       - uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
-      - name: checkout
+      - name: Checkout
         uses: cloudbees-io/checkout@v1
-      - name: Build
+      - name: Publish to Nexus
+        uses: docker://maven:3-eclipse-temurin-17
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          mvn deploy \
+            -DaltDeploymentRepository=nexus::default::https://${NEXUS_USERNAME}:${NEXUS_PASSWORD}@nexus.cb-demos.io/repository/Petclinic/
+  DockerImageBuildAndPush:
+    needs: ArtifactPublish
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+      - name: Build Docker Image
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install -DskipTests=true
-      - name: Configure AWS credentials
-        uses: cloudbees-io/configure-aws-credentials@v1
+      - name: Configure container registry credentials
+        id: dockerconfig
+        uses: cloudbees-io/configure-oci-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: us-east-1
-      - name: Remove existing key pair if exists
-        uses: docker://amazon/aws-cli:latest
-        run: >
-          if aws ec2 describe-key-pairs --key-name "ashokpetclinic" --region
-          us-east-1; then
-            aws ec2 delete-key-pair --key-name "ashokpetclinic" --region us-east-1
-          fi
-      - name: Create and use EC2 key pair
-        uses: docker://amazon/aws-cli:latest
-        run: >
-          aws ec2 create-key-pair --key-name ashokpetclinic --region us-east-1
-          --query 'KeyMaterial' --output text > ashokpetclinic.pem
-
-          chmod 400 ashokpetclinic.pem
-
-          INSTANCE_ID=$(aws ec2 run-instances --image-id ami-04b70fa74e45c3917 --instance-type t2.micro --key-name "ashokpetclinic" --region us-east-1 --query 'Instances[0].InstanceId' --output text)
-
-          echo $INSTANCE_ID > instance_id.txt
-
-          ls
-
-          cat instance_id.txt
-      - name: Wait for EC2 instance to be running
-        uses: docker://amazon/aws-cli:latest
-        run: >
-          INSTANCE_ID=$(cat instance_id.txt)
-
-          aws ec2 wait instance-running --instance-ids $INSTANCE_ID
-
-          PUBLIC_DNS=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[0].Instances[0].PublicDnsName' --output text)
-
-          echo $PUBLIC_DNS > public_dns.txt
-
-          cat public_dns.txt
-
-          ls 
-      - name: Add delay to ensure instance is ready
-        uses: docker://alpine:latest
+          registry: ${{ secrets.STAGING_DOCKER_REGISTRY }}
+          username: ${{ secrets.STAGING_DOCKER_USERNAME }}
+          password: ${{ secrets.STAGING_DOCKER_PASSWORD }}
+      - name: Push image to OCI registry
+        uses: cloudbees-io/kaniko@v1
+        with:
+          dockerfile: Dockerfile
+          context: .
+          destination: ${{ secrets.STAGING_DOCKER_REGISTRY }}/${{ secrets.STAGING_DOCKER_USERNAME }}/configserver:3.2.4
+  Approval:
+    needs: DockerImageBuildAndPush
+    type: manual-approval
+    environment: ashok
+    steps:
+      - name: Approval
+        uses: docker://maven:3-eclipse-temurin-17
         run: |
-          echo "Waiting for 60 seconds to ensure the instance is ready..."
-          sleep 60
-
-      - name: Transfer artifact to EC2 instance
-        uses: docker://alpine:latest
-        run: >
-          apk update
-
-          apk add openssh-client
-
-          PUBLIC_DNS=$(cat public_dns.txt)
-
-          scp -o StrictHostKeyChecking=no -i ashokpetclinic.pem  target/spring-petclinic-config-server-3.2.4.jar ubuntu@$PUBLIC_DNS:/home/ubuntu/
-      - name: Install Java 17 on EC2 instance
-        uses: docker://alpine:latest
-        run: >
-          apk update
-
-          apk add openssh-client
-
-          PUBLIC_DNS=$(cat public_dns.txt)
-
-          ssh -o StrictHostKeyChecking=no -i ashokpetclinic.pem ubuntu@$PUBLIC_DNS << 'EOF'
-           sudo apt update
-           sudo apt install -y openjdk-17-jdk
-           java -version
-           nohup java -jar /home/ubuntu/spring-petclinic-config-server-3.2.4.jar > /home/ubuntu/config-server.log 2>&1 &
-           disown
-          EOF
-      - name: Push instance_id.txt to repository
-        uses: docker://alpine:latest
+          echo "Manual approval required before proceeding to deployment."
+  SmokeTest:
+    needs: Approval
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+      - name: Smoke Test
+        uses: docker://maven:3-eclipse-temurin-17
         run: |
-          apk update
-          apk add git
-          git config --global user.email "c_aannamalai@cloudbees.com"
-          git config --global user.name "cashokannamalai"
-          git checkout -b ashok3
-          git add instance_id.txt
-          git commit -m "Update instance_id.txt with new EC2 instance ID"
-          git push -f origin ashok3
-      
-          
-          
-
+          mvn test
+  DeployInGKE:
+    needs: SmokeTest
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+      - uses: cashokannamalai/kubeconfig@v1
+        name: Set kubeconfig
+        with:
+          secname: ${{ secrets.kubeconfig }}
+      - uses: docker://bitnami/kubectl:latest
+        name: Deploy image
+        shell: sh
+        run: |
+          kubectl apply -f /cloudbees/workspace/deployment-service.yaml
+  CommitInfoStage:
+   needs: DeployInGKE
+   steps:
+    - name: Checkout
+      uses: cloudbees-io/checkout@v1
+    - name: Fetch SonarQube Metrics
+      id: sonar-metrics
+      uses: docker://alpine:latest
+      run: |
+        apk add --no-cache curl jq
+        curl -u ${{ secrets.username }}:${{ secrets.password }} \
+        "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR,MINOR" \
+        -o issues.json
+        BLOCKER_COUNT=$(jq '[.issues[] | select(.severity=="BLOCKER")] | length' issues.json)
+        CRITICAL_COUNT=$(jq '[.issues[] | select(.severity=="CRITICAL")] | length' issues.json)
+        MAJOR_COUNT=$(jq '[.issues[] | select(.severity=="MAJOR")] | length' issues.json)
+        MINOR_COUNT=$(jq '[.issues[] | select(.severity=="MINOR")] | length' issues.json)
+        echo "| Severity | Count |" > sonar-metrics.md
+        echo "|----------|-------|" >> sonar-metrics.md
+        echo "| Blocker  | $BLOCKER_COUNT |" >> sonar-metrics.md
+        echo "| Critical | $CRITICAL_COUNT |" >> sonar-metrics.md
+        echo "| Major    | $MAJOR_COUNT |" >> sonar-metrics.md
+        echo "| Minor    | $MINOR_COUNT |" >> sonar-metrics.md
+    - name: Capture Commit Information
+      id: commitinfo
+      uses: docker://alpine/git:latest
+      run: |
+        COMMIT_ID=$(git rev-parse HEAD)
+        COMMIT_MSG=$(git log -1 --pretty=format:%s)
+        echo "## Commit Information" > commit-info.md
+        echo "- Commit ID: $COMMIT_ID" >> commit-info.md
+        echo "- Commit Message: $COMMIT_MSG" >> commit-info.md
+        echo "## SonarQube Metrics" >> commit-info.md
+        cat sonar-metrics.md >> commit-info.md
+    - name: Configure Git
+      uses: docker://alpine/git:latest
+      run: |
+        git config --global user.email "c_aannamalai@cloudbees.com"
+        git config --global user.name "cashokannamalai"
+    - name: Commit and Push Commit Info
+      uses: docker://alpine/git:latest
+      run: |
+        git add commit-info.md sonar-metrics.md
+        git commit -m "Add commit information and SonarQube metrics from workflow"
+        git push
+  Evidence:
+    needs: CommitInfoStage
+    steps:
+      - name: Publish evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |
+            - Workflow ID: ${{ cloudbees.run_id }}
+            - URL: ${{ cloudbees.api.url }}
+            ## Commitinfo and SonarQube Quality
+            -CommitId: ${{ secrets.Commitinfo }}
