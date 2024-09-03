@@ -36,7 +36,7 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn -q -Dsurefire.printSummary=false test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
-          echo "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
+          cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
   StaticAnalysis:
     steps:
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
