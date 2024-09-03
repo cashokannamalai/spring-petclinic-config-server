@@ -1,6 +1,6 @@
 ## Commit Information
-- Commit ID: 1535f889496d9ef93056f63e7d4442594b1a019c
-- Commit Message: added id to step
+- Commit ID: 421be5ee7cc71eb553c5c6adfd082a278116a164
+- Commit Message: -q -Dsurefire.printSummary=false
 ## SonarQube Metrics
 | Severity | Count |
 |----------|-------|
