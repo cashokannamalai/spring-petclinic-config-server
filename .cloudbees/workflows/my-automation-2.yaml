@@ -27,7 +27,7 @@ jobs:
   UnitTest:
     needs: Build
     outputs:
-      unitTestResults: test 
+      unitTestResults:  ${{ steps.RunUnitTest.outputs.mvn_test_stdio }}
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
