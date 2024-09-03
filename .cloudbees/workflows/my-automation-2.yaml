@@ -236,6 +236,7 @@ jobs:
           content: |
             - Workflow ID: ${{ cloudbees.run_id }}
             - URL: ${{ cloudbees.api.url }}
+            - Unit Test Results: "${{ needs.UnitTest.outputs.unitTestResults }}"
             ## Commitinfo and SonarQube Quality
             -CommitId: ${{ secrets.Commitinfo }}
 
@@ -246,7 +247,7 @@ jobs:
             | Critical | ${{ secrets.CRITICAL_COUNT }} |
             | Major    | ${{ secrets.MAJOR_COUNT }} |
             ```
-            -${{ needs.UnitTest.outputs.unitTestResults }} 
+
     needs:
       - CommitInfoStage
       - UnitTest
