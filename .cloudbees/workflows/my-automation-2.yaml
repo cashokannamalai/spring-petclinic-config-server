@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 jobs:
   Checkout:
     steps:
@@ -26,7 +27,7 @@ jobs:
   UnitTest:
     needs: Build
     outputs:
-      unitTestResults: "test" #${{ steps.RunUnitTest.outputs.mvn_test_stdio  }}
+      unitTestResults: test
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
