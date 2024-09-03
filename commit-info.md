@@ -1,6 +1,6 @@
 ## Commit Information
-- Commit ID: 4d44887f6eb82adb611a0a576762b889bfa85263
-- Commit Message: changed branch to shozab
+- Commit ID: 7e36074cd2e5c87fb0545245ecfa2ec3a1952825
+- Commit Message:           echo "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
 ## SonarQube Metrics
 | Severity | Count |
 |----------|-------|
