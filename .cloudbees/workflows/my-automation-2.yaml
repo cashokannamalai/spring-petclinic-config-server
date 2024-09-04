@@ -27,16 +27,16 @@ jobs:
   UnitTest:
     needs: Build
     outputs:
-      unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio }}
+      unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
       - name: RunUnitTest
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
-        run: >
+        run: |
           mvn test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
-          cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
+          cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
   StaticAnalysis:
     steps:
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
