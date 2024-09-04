@@ -2,9 +2,6 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
-  push:
-    branches:
-      - shozab
   workflow_dispatch:
 jobs:
   Checkout:
@@ -27,7 +24,7 @@ jobs:
   UnitTest:
     needs: Build
     outputs:
-      unitTestResults:  ${{ steps.RunUnitTest.outputs.mvn_test_stdio }}
+      unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio }}
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
@@ -35,7 +32,7 @@ jobs:
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
         run: |
-          mvn test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
+          mvn test | grep "[INFO] Tests run:" > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
           cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
   StaticAnalysis:
     steps:
@@ -248,7 +245,6 @@ jobs:
             | Critical | ${{ secrets.CRITICAL_COUNT }} |
             | Major    | ${{ secrets.MAJOR_COUNT }} |
             ```
-
     needs:
       - CommitInfoStage
       - UnitTest
