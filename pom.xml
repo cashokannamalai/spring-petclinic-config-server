@@ -90,16 +90,19 @@
             <type>pom</type>
             <scope>import</scope>
         </dependency>
-        <dependency>
-    <groupId>io.rollout.rox</groupId>
-    <artifactId>rox-java-server</artifactId>
-    <version>5.0.10</version>
-</dependency>
+     
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.32</version>
         </dependency>
+
+
+           <dependency>
+       <groupId>io.rollout.rox</groupId>
+      <artifactId>rox-java-server</artifactId>
+      <version>5.0.10</version>
+    </dependency>
     </dependencies>
 
     <build>
