@@ -19,6 +19,7 @@ jobs:
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
+        working-directory: /cloudbees/workspace # Ensure this matches where the repository is checked out
 
       - name: Ensure Commit Contains JIRA Issue Key
         uses: docker://alpine/git:latest
@@ -27,8 +28,10 @@ jobs:
             echo "Commit does not contain a valid JIRA issue key like  CBDEMO. Please include it in the commit message."
             exit 1
           fi
+        working-directory: /cloudbees/workspace # Ensure this matches where the repository is checked out
 
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn compile
+        working-directory: /cloudbees/workspace # Ensure this matches where the repository is checked out
