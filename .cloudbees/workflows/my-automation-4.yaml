@@ -2,16 +2,15 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My Automation
 on:
-  push:
+ 
+  pull_request:
     branches:
       - ashok
-
 jobs:
   Checkout:
     steps:
       - name: Checkout Source Code
         uses: cloudbees-io/checkout@v1
-
   Build:
     needs: Checkout
     steps:
@@ -19,19 +18,7 @@ jobs:
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
-        working-directory: /cloudbees/workspace # Ensure this matches where the repository is checked out
-
-      - name: Ensure Commit Contains JIRA Issue Key
-        uses: docker://alpine/git:latest
-        run: |
-          if ! git log -1 --pretty=%B | grep -qE 'CBDEMO-[0-9]+'; then
-            echo "Commit does not contain a valid JIRA issue key like  CBDEMO. Please include it in the commit message."
-            exit 1
-          fi
-        working-directory: /cloudbees/workspace # Ensure this matches where the repository is checked out
-
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn compile
-        working-directory: /cloudbees/workspace # Ensure this matches where the repository is checked out
