@@ -24,7 +24,7 @@ jobs:
         uses: docker://alpine/git:latest
         run: |
           if ! git log -1 --pretty=%B | grep -qE 'CBDEMO-[0-9]+'; then
-            echo "Commit does not contain a valid JIRA issue key like CBDEMO-123. Please include it in the commit message."
+            echo "Commit does not contain a valid JIRA issue key like  CBDEMO. Please include it in the commit message."
             exit 1
           fi
 
