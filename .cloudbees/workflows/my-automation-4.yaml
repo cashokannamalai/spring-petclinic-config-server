@@ -23,15 +23,12 @@ jobs:
       - name: Ensure Commit Contains JIRA Issue Key
         uses: docker://alpine/git:latest
         run: |
-          if ! git log -1 --pretty=%B | grep -qE 'PROJECT-[0-9]+'; then
-            echo "Commit does not contain a valid JIRA issue key CBDEMO-128."
+          if ! git log -1 --pretty=%B | grep -qE 'CBDEMO-[0-9]+'; then
+            echo "Commit does not contain a valid JIRA issue key like CBDEMO-123. Please include it in the commit message."
             exit 1
           fi
-        # This checks the latest commit message for a valid JIRA issue key format.
 
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn compile
-
-  
