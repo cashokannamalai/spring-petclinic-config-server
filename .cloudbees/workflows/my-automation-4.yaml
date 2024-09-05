@@ -23,6 +23,8 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-          mvn test
-
           
+      - name: Run JAR
+        uses: docker://maven:3-eclipse-temurin-17
+        run: |
+          java -jar target/spring-petclinic-config-server-3.2.4.jar
