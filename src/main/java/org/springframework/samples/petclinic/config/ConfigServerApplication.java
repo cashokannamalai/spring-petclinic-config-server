@@ -1,23 +1,11 @@
-/*
- * Copyright 2002-2021 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.springframework.samples.petclinic.config;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.config.server.EnableConfigServer;
+
+import io.rollout.rox.server.Rox;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Maciej Szarlinski
@@ -26,7 +14,22 @@ import org.springframework.cloud.config.server.EnableConfigServer;
 @SpringBootApplication
 public class ConfigServerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ConfigServerApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigServerApplication.class, args);
+        try {
+            // Initialize Flags container class
+            Flags flags = new Flags();
+
+            // Register the flags container under a namespace
+            Rox.register("default", flags);
+
+            // Setup connection with the feature management environment key
+            Rox.setup("64595968-4a49-4f49-7ebd-b08938ad1d2e").get();
+
+            // Prints the value of the boolean enableTutorial flag
+            System.out.printf("enableTutorial value is %s%n", flags.enableTutorial.isEnabled() ? "true" : "false");
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
 }
