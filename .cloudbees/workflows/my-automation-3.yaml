@@ -23,3 +23,6 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
+          mvn test
+
+          
