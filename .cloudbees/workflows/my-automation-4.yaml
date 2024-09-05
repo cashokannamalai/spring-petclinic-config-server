@@ -2,8 +2,7 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My Automation
 on:
- 
-  pull_request:
+  push:
     branches:
       - ashok
 jobs:
