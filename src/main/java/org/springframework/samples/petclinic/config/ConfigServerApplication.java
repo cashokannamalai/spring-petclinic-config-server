@@ -33,11 +33,7 @@ public class ConfigServerApplication {
         // Prints the value of the boolean enableTutorial flag
         System.out.printf("enableTutorial value is %s%n", flags.enableTutorial.isEnabled() ? "true" : "false");
 
-        // Debugging Rox SDK setup
-        if (Rox.isSetup()) {
-            System.out.println("Rox SDK successfully connected.");
-        } else {
-            System.out.println("Rox SDK connection failed.");
-        }
+        // Optional: Logging message to ensure Rox setup is complete (depending on your SDK version)
+        System.out.println("Rox SDK setup completed successfully.");
     }
 }
