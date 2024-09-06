@@ -26,5 +26,6 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean package
-          mvn spring-boot:run -Drox.key="64595968-4a49-4f49-7ebd-b08938ad1d2e"
-
+          mvn spring-boot:run
+        env:
+          ROX_KEY: ${{ secrets.ROX_KEY }}
