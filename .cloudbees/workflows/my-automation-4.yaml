@@ -13,6 +13,8 @@ jobs:
         
   Build:
     needs: Checkout
+    env:
+        ROX_KEY: ${{ secrets.ROX_KEY }}
     steps:
       - name: Configure Git
         uses: docker://alpine/git:latest
@@ -27,5 +29,5 @@ jobs:
         run: |
           mvn clean package
           mvn spring-boot:run
-        env:
-          ROX_KEY: ${{ secrets.ROX_KEY }}
+        
+
