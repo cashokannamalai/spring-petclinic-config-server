@@ -14,7 +14,7 @@ jobs:
   Build:
     needs: Checkout
     env:
-        ROX_KEY: ${{ secrets.ROX_KEY }}
+      ROX_KEY: ${{ secrets.ROX_KEY }}  
     steps:
       - name: Configure Git
         uses: docker://alpine/git:latest
@@ -28,5 +28,4 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean package
-          export ROX_KEY="7d77f2ce-ada9-4276-564c-ac004dc6c37e"
           mvn spring-boot:run
