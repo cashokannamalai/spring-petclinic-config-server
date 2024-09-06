@@ -1,9 +1,8 @@
 package org.springframework.samples.petclinic.config;
 
-import io.rollout.rox.server.FeatureFlag;
+import io.rollout.configuration.RoxContainer;
+import io.rollout.flags.RoxFlag;
 
-public class Flags {
-
-    @FeatureFlag
-    public FeatureFlag enableTutorial;
+public class Flags implements RoxContainer {
+    public RoxFlag enableTutorial = new RoxFlag();
 }
