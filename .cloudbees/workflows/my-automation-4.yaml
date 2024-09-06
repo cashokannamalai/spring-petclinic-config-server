@@ -13,8 +13,7 @@ jobs:
         
   Build:
     needs: Checkout
-    env:
-      ROX_KEY: ${{ secrets.ROX_KEY }}  
+   
     steps:
       - name: Configure Git
         uses: docker://alpine/git:latest
