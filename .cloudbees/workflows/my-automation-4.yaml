@@ -12,8 +12,7 @@ jobs:
         uses: cloudbees-io/checkout@v1
   Build:
     needs: Checkout
-    env:
-      FEATURE_MANAGEMENT_KEY: "7d77f2ce-ada9-4276-564c-ac004dc6c37e"
+    environment: sampleflag
     steps:
       - name: Configure Git
         uses: docker://alpine/git:latest
