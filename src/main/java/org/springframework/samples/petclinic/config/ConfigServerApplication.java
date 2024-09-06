@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.concurrent.ExecutionException;
 
-@EnableConfigServer
 @SpringBootApplication
+@EnableConfigServer
 public class ConfigServerApplication {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigServerApplication.class);
@@ -19,15 +19,15 @@ public class ConfigServerApplication {
     @Value("${feature.management.key}")
     private String featureManagementKey;
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    @Autowired
+    private Flags flags;
+
+    public static void main(String[] args) {
         SpringApplication.run(ConfigServerApplication.class, args);
-        ConfigServerApplication app = new ConfigServerApplication();
-        app.initializeFeatureFlags();
     }
 
-    private void initializeFeatureFlags() throws ExecutionException, InterruptedException {
-        Flags flags = new Flags();
-
+    @PostConstruct
+    public void initializeFeatureFlags() throws ExecutionException, InterruptedException {
         // Register the flags container under a namespace
         Rox.register("default", flags);
 
