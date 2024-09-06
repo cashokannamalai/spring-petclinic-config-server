@@ -32,23 +32,20 @@ import java.util.concurrent.ExecutionException;
 @EnableConfigServer
 @SpringBootApplication
 public class ConfigServerApplication {
-
-
-	private static final Logger log = LoggerFactory.getLogger(ConfigServerApplication.class);
-
-	public static void main(String[] args) throws ExecutionException, InterruptedException {
-		SpringApplication.run(ConfigServerApplication.class, args);
-		Flags flags = new Flags();
-
-		// Register the flags container under a namespace
-		Rox.register("default", flags);
-
-		// Setup connection with the feature management environment key
-		Rox.setup("7d77f2ce-ada9-4276-564c-ac004dc6c37e").get();
-
-		// Check and print the value of the 'enableTutorial' flag
-		boolean isTutorialEnabled = flags.enableTutorial.isEnabled();
-		log.info("enableTutorial value is {}", isTutorialEnabled ? "true" : "false");
-
-	}
+    private static final Logger log = LoggerFactory.getLogger(ConfigServerApplication.class);
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        SpringApplication.run(ConfigServerApplication.class, args);
+        // Access the environment variable
+        String featureManagementKey = System.getenv("FEATURE_MANAGEMENT_KEY");
+        // Set up the flags and connect using the environment variable
+        Flags flags = new Flags();
+        Rox.register("default", flags);
+        if (featureManagementKey != null) {
+            Rox.setup(featureManagementKey).get();
+        } else {
+            log.error("FEATURE_MANAGEMENT_KEY is not set.");
+        }
+        boolean isTutorialEnabled = flags.enableTutorial.isEnabled();
+        log.info("enableTutorial value is {}", isTutorialEnabled ? "true" : "false");
+    }
 }
