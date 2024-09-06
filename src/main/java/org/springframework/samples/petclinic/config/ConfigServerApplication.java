@@ -25,15 +25,18 @@ public class ConfigServerApplication {
         Rox.register("default", flags);
 
         // Get Rox environment key from system properties or fallback to default
-        String roxKey = System.getProperty("rox.key", "64595968-4a49-4f49-7ebd-b08938ad1d2e");
+        String roxKey = System.getenv("ROX_KEY");
+
+        if (roxKey == null || roxKey.isEmpty()) {
+            System.err.println("Rox key is not set or is empty!");
+            System.exit(1);
+        }
 
         // Setup connection with the feature management environment key
         Rox.setup(roxKey).get();
 
         // Prints the value of the boolean enableTutorial flag
-        
-        System.out.printf("Rox key being used: %s%n", System.getenv("ROX_KEY"));
-
+        System.out.printf("Rox key being used: %s%n", roxKey);
 
         // Optional: Logging message to ensure Rox setup is complete (depending on your SDK version)
         System.out.println("Rox SDK setup completed successfully.");
