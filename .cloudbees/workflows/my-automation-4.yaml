@@ -12,6 +12,7 @@ jobs:
         uses: cloudbees-io/checkout@v1
   Build:
     needs: Checkout
+    environment: ashok
     steps:
       - name: Configure Git
         uses: docker://alpine/git:latest
