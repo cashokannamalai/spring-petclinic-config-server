@@ -11,5 +11,4 @@ spring:
         native:
           search-locations: file:///${GIT_REPO}
 
-rox:
-  key: "${ROX_KEY}"
+roxKey: "${ROX_KEY}"
