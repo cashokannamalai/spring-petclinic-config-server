@@ -31,7 +31,9 @@ public class ConfigServerApplication {
         Rox.setup(roxKey).get();
 
         // Prints the value of the boolean enableTutorial flag
-        System.out.printf("enableTutorial value is %s%n", flags.enableTutorial.isEnabled() ? "true" : "false");
+        
+        System.out.printf("Rox key being used: %s%n", System.getenv("ROX_KEY"));
+
 
         // Optional: Logging message to ensure Rox setup is complete (depending on your SDK version)
         System.out.println("Rox SDK setup completed successfully.");
