@@ -10,3 +10,5 @@ spring:
           default-label: main
         native:
           search-locations: file:///${GIT_REPO}
+rox:
+  key: "64595968-4a49-4f49-7ebd-b08938ad1d2e"
