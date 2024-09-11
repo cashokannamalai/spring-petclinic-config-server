@@ -127,15 +127,30 @@
                 </executions>
             </plugin>
             <plugin>
-  <groupId>org.owasp</groupId>
-  <artifactId>dependency-check-maven</artifactId>
-  <version>8.2.1</version> <!-- Use the latest version -->
-  <configuration>
-    <failBuildOnCVSS>7</failBuildOnCVSS>
-    <format>HTML</format>
-    <dataDirectory>${project.build.directory}/dependency-check-data</dataDirectory>
-  </configuration>
-</plugin>
+            <groupId>org.cyclonedx</groupId>
+            <artifactId>cyclonedx-maven-plugin</artifactId>
+            <version>2.7.8</version> <!-- Use the latest stable version -->
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>makeBom</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <includeConfigs>
+                    <includeConfig>runtimeClasspath</includeConfig>
+                </includeConfigs>
+                <projectType>application</projectType>
+                <schemaVersion>1.5</schemaVersion>
+                <destination>${project.build.directory}/reports</destination>
+                <outputName>bom</outputName>
+                <outputFormat>xml</outputFormat>
+                <includeBomSerialNumber>false</includeBomSerialNumber>
+                <includeLicenseText>false</includeLicenseText>
+                <componentVersion>2.0.0</componentVersion>
+            </configuration>
+        </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
