@@ -25,11 +25,27 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean package
-
-  Scan:
-    needs: Build
-    steps:
-      - name: Run Snyk Security Scan
-        uses: docker://snyk/snyk-cli:latest
+      - name: Run SonarQube Analysis
+        uses: docker://sonarsource/sonar-scanner-cli:latest
         run: |
-          snyk test
+          sonar-scanner \
+            -Dsonar.projectKey=spring-petclinic-config-server \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=https://sonarqube.cb-demos.io \
+            -Dsonar.login=$SONARQUBE_TOKEN
+      - name: Get Vulnerability Report
+        uses: docker://alpine/git:latest
+        run: |
+          # Fetch the latest analysis report
+          curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server" \
+            -H "Authorization: Bearer $SONARQUBE_TOKEN" \
+            | jq '.total' > total_vulnerabilities.txt
+          curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server&statuses=OPEN" \
+            -H "Authorization: Bearer $SONARQUBE_TOKEN" \
+            | jq '.total' > open_vulnerabilities.txt
+          curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server&statuses=REOPENED" \
+            -H "Authorization: Bearer $SONARQUBE_TOKEN" \
+            | jq '.total' > reopened_vulnerabilities.txt
+          curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server&statuses=RESOLVED" \
+            -H "Authorization: Bearer $SONARQUBE_TOKEN" \
+            | jq '.total' > resolved_vulnerabilities.txt
