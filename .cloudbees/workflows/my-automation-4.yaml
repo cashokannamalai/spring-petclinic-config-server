@@ -32,7 +32,8 @@ jobs:
             -Dsonar.projectKey=spring-petclinic-config-server \
             -Dsonar.sources=. \
             -Dsonar.host.url=https://sonarqube.cb-demos.io \
-            -Dsonar.login=${{ secrets.token }}
+            -Dsonar.login=${{ secrets.token }} \
+            -Dsonar.java.binaries=target/classes
       - name: Get Vulnerability Report
         uses: docker://alpine/git:latest
         run: |
