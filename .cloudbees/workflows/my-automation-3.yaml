@@ -21,6 +21,7 @@ jobs:
     outputs:
       commit_id: ${{ steps.commitinfo.outputs.commit_id }}
       commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
+
   Build:
     needs: Checkout
     outputs:
@@ -41,109 +42,67 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: >
           mvn test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
-
           cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1
           > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
-      - name: Configure container registry credentials
-        id: dockerconfig
-        uses: cloudbees-io/configure-oci-credentials@v1
-        with:
-          registry: ${{ secrets.STAGING_DOCKER_REGISTRY }}
-          username: ${{ secrets.STAGING_DOCKER_USERNAME }}
-          password: ${{ secrets.STAGING_DOCKER_PASSWORD }}
-      - name: Push image to OCI registry
-        uses: cloudbees-io/kaniko@v1
-        with:
-          dockerfile: Dockerfile
-          context: .
-          destination: ${{ secrets.STAGING_DOCKER_REGISTRY }}/${{
-            secrets.STAGING_DOCKER_USERNAME }}/configserver:3.2.4
+
   StaticAnalysis:
     outputs:
       BLOCKER_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }}
       CRITICAL_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.CRITICAL_COUNT }}
       MAJOR_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }}
       MINOR_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }}
-      TOTAL_VULNERABILITIES: ${{ steps.FetchVulnerabilityStatus.outputs.TOTAL_VULNERABILITIES }}
-      OPEN_VULNERABILITIES: ${{ steps.FetchVulnerabilityStatus.outputs.OPEN_VULNERABILITIES }}
-      REOPENED_VULNERABILITIES: ${{ steps.FetchVulnerabilityStatus.outputs.REOPENED_VULNERABILITIES }}
-      RESOLVED_VULNERABILITIES: ${{ steps.FetchVulnerabilityStatus.outputs.RESOLVED_VULNERABILITIES }}
+      TOTAL_VULNERABILITIES: ${{ steps.FetchVulnerabilitiesOverview.outputs.TOTAL_VULNERABILITIES }}
+      OPEN_VULNERABILITIES: ${{ steps.FetchVulnerabilitiesOverview.outputs.OPEN_VULNERABILITIES }}
+      REOPENED_VULNERABILITIES: ${{ steps.FetchVulnerabilitiesOverview.outputs.REOPENED_VULNERABILITIES }}
+      RESOLVED_VULNERABILITIES: ${{ steps.FetchVulnerabilitiesOverview.outputs.RESOLVED_VULNERABILITIES }}
     steps:
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
-        name: SonarQube Scan
+        name: Scan with SonarQube
         kind: scan
         with:
           server-url: https://sonarqube.cb-demos.io
           username: ${{ secrets.username }}
           password: ${{ secrets.password }}
           language: Java
-
-      - name: Find Security Bugs Scan
-        uses: cloudbees-io/findsecbugs-sast-scan-code@v1
-        kind: scan
-        with:
-          language: LANGUAGE_JAVA
-
-      - name: OWASP Dependency Check
-        id: DependencyCheck
-        uses: docker://owasp/dependency-check:latest
-        run: |
-          mkdir owasp-reports
-          dependency-check.sh --project MyApp --scan . --out owasp-reports/
-          VULNERABILITIES=$(jq '.vulnerabilities | length' owasp-reports/dependency-check-report.json)
-          echo "vulnerability_count=${VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/vulnerability_count
-
       - name: Fetch SonarQube Issues
         id: FetchSonarQubeIssues
         uses: docker://alpine/git:latest
-        run: |
+        run: >
           apk add --no-cache curl jq
+          curl -u ${{ secrets.username }}:${{ secrets.password }} \
+          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR" \
+          -o sonar-issues.json
+          BLOCKER_COUNT=$(jq '[.issues[] | select(.severity=="BLOCKER")] | length' sonar-issues.json)
+          CRITICAL_COUNT=$(jq '[.issues[] | select(.severity=="CRITICAL")] | length' sonar-issues.json)
+          MAJOR_COUNT=$(jq '[.issues[] | select(.severity=="MAJOR")] | length' sonar-issues.json)
+          MINOR_COUNT=$(jq '[.issues[] | select(.severity=="MINOR")] | length' sonar-issues.json)
+          echo "BLOCKER_COUNT=${BLOCKER_COUNT}" >> $CLOUDBEES_OUTPUTS/BLOCKER_COUNT
+          echo "CRITICAL_COUNT=${CRITICAL_COUNT}" >> $CLOUDBEES_OUTPUTS/CRITICAL_COUNT
+          echo "MAJOR_COUNT=${MAJOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MAJOR_COUNT
+          echo "MINOR_COUNT=${MINOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MINOR_COUNT
 
-           curl -u ${{ secrets.username }}:${{ secrets.password }} \
-           "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR,MINOR&statuses=OPEN,REOPENED,RESOLVED" \
-           -o sonar-issues.json
+      - name: Fetch SonarQube Vulnerabilities Overview
+        id: FetchVulnerabilitiesOverview
+        uses: docker://alpine/git:latest
+        run: |
+          curl -u ${{ secrets.username }}:${{ secrets.password }} \
+          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR&types=VULNERABILITY" \
+          -o sonar-vulnerabilities.json
+          TOTAL_VULNERABILITIES=$(jq '[.issues[]] | length' sonar-vulnerabilities.json)
+          OPEN_VULNERABILITIES=$(jq '[.issues[] | select(.status=="OPEN")] | length' sonar-vulnerabilities.json)
+          REOPENED_VULNERABILITIES=$(jq '[.issues[] | select(.status=="REOPENED")] | length' sonar-vulnerabilities.json)
+          RESOLVED_VULNERABILITIES=$(jq '[.issues[] | select(.status=="RESOLVED")] | length' sonar-vulnerabilities.json)
+          echo "TOTAL_VULNERABILITIES=${TOTAL_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/TOTAL_VULNERABILITIES
+          echo "OPEN_VULNERABILITIES=${OPEN_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/OPEN_VULNERABILITIES
+          echo "REOPENED_VULNERABILITIES=${REOPENED_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/REOPENED_VULNERABILITIES
+          echo "RESOLVED_VULNERABILITIES=${RESOLVED_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/RESOLVED_VULNERABILITIES
 
-   
-            BLOCKER_COUNT=$(jq '[.issues[] | select(.severity=="BLOCKER")] | length' sonar-issues.json)
-            CRITICAL_COUNT=$(jq '[.issues[] | select(.severity=="CRITICAL")] | length' sonar-issues.json)
-            MAJOR_COUNT=$(jq '[.issues[] | select(.severity=="MAJOR")] | length' sonar-issues.json)
-            MINOR_COUNT=$(jq '[.issues[] | select(.severity=="MINOR")] | length' sonar-issues.json)
 
-            OPEN_COUNT=$(jq '[.issues[] | select(.status=="OPEN")] | length' sonar-issues.json)
-            REOPENED_COUNT=$(jq '[.issues[] | select(.status=="REOPENED")] | length' sonar-issues.json)
-            RESOLVED_COUNT=$(jq '[.issues[] | select(.status=="RESOLVED")] | length' sonar-issues.json)
-
-
-            echo "BLOCKER_COUNT=${BLOCKER_COUNT}" >> $CLOUDBEES_OUTPUTS/BLOCKER_COUNT
-            echo "CRITICAL_COUNT=${CRITICAL_COUNT}" >> $CLOUDBEES_OUTPUTS/CRITICAL_COUNT
-            echo "MAJOR_COUNT=${MAJOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MAJOR_COUNT
-            echo "MINOR_COUNT=${MINOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MINOR_COUNT
-
-            echo "OPEN_COUNT=${OPEN_COUNT}" >> $CLOUDBEES_OUTPUTS/OPEN_COUNT
-            echo "REOPENED_COUNT=${REOPENED_COUNT}" >> $CLOUDBEES_OUTPUTS/REOPENED_COUNT
-            echo "RESOLVED_COUNT=${RESOLVED_COUNT}" >> $CLOUDBEES_OUTPUTS/RESOLVED_COUNT
 
  
 
-
-  Deploy:
-    needs: StaticAnalysis
-    kind: deploy
-    steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-      - uses: cashokannamalai/kubeconfig@v1
-        name: Set kubeconfig
-        with:
-          secname: ${{ secrets.kubeconfig }}
-      - uses: docker://bitnami/kubectl:latest
-        name: Deploy image
-        shell: sh
-        run: |
-          kubectl apply -f /cloudbees/workspace/deployment-service.yaml
   Evidence:
     needs:
-      - Deploy
       - Build
       - Checkout
       - StaticAnalysis
@@ -151,25 +110,26 @@ jobs:
       - uses: cloudbees-io/publish-evidence-item@v1
         name: Publish evidence
         with:
-         content: >
-           - Workflow ID: ${{ cloudbees.run_id }}
-           - URL: ${{ cloudbees.api.url }}
-
-           ## Commit Information
+          content: |
+            - Workflow ID: ${{ cloudbees.run_id }}
+            - URL: ${{ cloudbees.api.url }}
+            ## Commit Information
             - **Commit ID:** "${{ needs.Checkout.outputs.commit_id }}"
             - **Commit Message:** "${{ needs.Checkout.outputs.commit_msg }}"
             - **Unit Test Results:** "${{ needs.Build.outputs.unitTestResults }}"
-
-             ## SonarQube Analysis Results
+            ## SonarQube Analysis Results
             | Severity And Issue Count |
             |------------------------|
             |  Blocker: ${{ needs.StaticAnalysis.outputs.BLOCKER_COUNT }} |
             |  Critical: ${{ needs.StaticAnalysis.outputs.CRITICAL_COUNT }} |
             |  Major: ${{ needs.StaticAnalysis.outputs.MAJOR_COUNT }} |
             |  Minor: ${{ needs.StaticAnalysis.outputs.MINOR_COUNT }} |
+            ## Vulnerabilities Overview
+            | **Vulnerabilities Summary** |
+            |----------------------------|
+            | **Total Vulnerabilities:** "${{ needs.StaticAnalysis.outputs.TOTAL_VULNERABILITIES }}" |
+            | **Open Vulnerabilities:** "${{ needs.StaticAnalysis.outputs.OPEN_VULNERABILITIES }}" |
+            | **Reopened Vulnerabilities:** "${{ needs.StaticAnalysis.outputs.REOPENED_VULNERABILITIES }}" |
+            | **Resolved Vulnerabilities:** "${{ needs.StaticAnalysis.outputs.RESOLVED_VULNERABILITIES }}" |
+         
 
-            | Status And Issue Count |
-            |------------------------|
-            |  Open: ${{ needs.StaticAnalysis.outputs.OPEN_COUNT }} |
-            |  Reopened: ${{ needs.StaticAnalysis.outputs.REOPENED_COUNT }} |
-            |  Resolved: ${{ needs.StaticAnalysis.outputs.RESOLVED_COUNT }} |
