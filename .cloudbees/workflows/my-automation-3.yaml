@@ -96,77 +96,36 @@ jobs:
       - name: Fetch SonarQube Issues
         id: FetchSonarQubeIssues
         uses: docker://alpine/git:latest
-        run: >
+        run: |
           apk add --no-cache curl jq
 
-          curl -u ${{ secrets.username }}:${{ secrets.password }} \
-          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR" \
-          -o sonar-issues.json
+           curl -u ${{ secrets.username }}:${{ secrets.password }} \
+           "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR,MINOR&statuses=OPEN,REOPENED,RESOLVED" \
+           -o sonar-issues.json
 
-          BLOCKER_COUNT=$(jq '[.issues[] | select(.severity=="BLOCKER")] | length' sonar-issues.json)
-          CRITICAL_COUNT=$(jq '[.issues[] | select(.severity=="CRITICAL")] | length' sonar-issues.json)
-          MAJOR_COUNT=$(jq '[.issues[] | select(.severity=="MAJOR")] | length' sonar-issues.json)
-          MINOR_COUNT=$(jq '[.issues[] | select(.severity=="MINOR")] | length' sonar-issues.json)
+   
+            BLOCKER_COUNT=$(jq '[.issues[] | select(.severity=="BLOCKER")] | length' sonar-issues.json)
+            CRITICAL_COUNT=$(jq '[.issues[] | select(.severity=="CRITICAL")] | length' sonar-issues.json)
+            MAJOR_COUNT=$(jq '[.issues[] | select(.severity=="MAJOR")] | length' sonar-issues.json)
+            MINOR_COUNT=$(jq '[.issues[] | select(.severity=="MINOR")] | length' sonar-issues.json)
 
-          echo "BLOCKER_COUNT=${BLOCKER_COUNT}" >> $CLOUDBEES_OUTPUTS/BLOCKER_COUNT
-          echo "CRITICAL_COUNT=${CRITICAL_COUNT}" >> $CLOUDBEES_OUTPUTS/CRITICAL_COUNT
-          echo "MAJOR_COUNT=${MAJOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MAJOR_COUNT
-          echo "MINOR_COUNT=${MINOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MINOR_COUNT
+            OPEN_COUNT=$(jq '[.issues[] | select(.status=="OPEN")] | length' sonar-issues.json)
+            REOPENED_COUNT=$(jq '[.issues[] | select(.status=="REOPENED")] | length' sonar-issues.json)
+            RESOLVED_COUNT=$(jq '[.issues[] | select(.status=="RESOLVED")] | length' sonar-issues.json)
 
-      - name: Fetch Vulnerability Status from SonarQube
-        id: FetchVulnerabilityStatus
-        uses: docker://alpine/git:latest
-        run: >
-          apk add --no-cache curl jq
 
-          curl -u ${{ secrets.username }}:${{ secrets.password }} \
-          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&types=VULNERABILITY" \
-          -o vulnerabilities.json
+            echo "BLOCKER_COUNT=${BLOCKER_COUNT}" >> $CLOUDBEES_OUTPUTS/BLOCKER_COUNT
+            echo "CRITICAL_COUNT=${CRITICAL_COUNT}" >> $CLOUDBEES_OUTPUTS/CRITICAL_COUNT
+            echo "MAJOR_COUNT=${MAJOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MAJOR_COUNT
+            echo "MINOR_COUNT=${MINOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MINOR_COUNT
 
-          TOTAL_VULNERABILITIES=$(jq '.total' vulnerabilities.json)
-          OPEN_VULNERABILITIES=$(jq '[.issues[] | select(.status=="OPEN")] | length' vulnerabilities.json)
-          REOPENED_VULNERABILITIES=$(jq '[.issues[] | select(.status=="REOPENED")] | length' vulnerabilities.json)
-          RESOLVED_VULNERABILITIES=$(jq '[.issues[] | select(.status=="RESOLVED")] | length' vulnerabilities.json)
+            echo "OPEN_COUNT=${OPEN_COUNT}" >> $CLOUDBEES_OUTPUTS/OPEN_COUNT
+            echo "REOPENED_COUNT=${REOPENED_COUNT}" >> $CLOUDBEES_OUTPUTS/REOPENED_COUNT
+            echo "RESOLVED_COUNT=${RESOLVED_COUNT}" >> $CLOUDBEES_OUTPUTS/RESOLVED_COUNT
 
-          echo "TOTAL_VULNERABILITIES=${TOTAL_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/TOTAL_VULNERABILITIES
-          echo "OPEN_VULNERABILITIES=${OPEN_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/OPEN_VULNERABILITIES
-          echo "REOPENED_VULNERABILITIES=${REOPENED_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/REOPENED_VULNERABILITIES
-          echo "RESOLVED_VULNERABILITIES=${RESOLVED_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/RESOLVED_VULNERABILITIES
+ 
 
-  ArtifactPublish:
-    needs: Build
-    steps:
-      - uses: docker://alpine/git:latest
-        run: |
-          git config --global --add safe.directory /cloudbees/workspace
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-      - name: Publish to Nexus
-        uses: docker://maven:3-eclipse-temurin-17
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        run: >
-          mvn deploy \
-            -DaltDeploymentRepository=nexus::default::https://${NEXUS_USERNAME}:${NEXUS_PASSWORD}@nexus.cb-demos.io/repository/Petclinic/
-  Approval:
-    needs: ArtifactPublish
-    type: manual-approval
-    environment: ashok
-    steps:
-      - name: Approval
-        uses: docker://maven:3-eclipse-temurin-17
-        run: |
-          echo "Manual approval required before proceeding to deployment."
-  SmokeTest:
-    needs: Approval
-    steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-      - name: Smoke Test
-        uses: docker://maven:3-eclipse-temurin-17
-        run: |
-          mvn test
+
   Deploy:
     needs: SmokeTest
     kind: deploy
@@ -192,30 +151,25 @@ jobs:
       - uses: cloudbees-io/publish-evidence-item@v1
         name: Publish evidence
         with:
-          content: >
-            - Workflow ID: ${{ cloudbees.run_id }}
+         content: >
+           - Workflow ID: ${{ cloudbees.run_id }}
+           - URL: ${{ cloudbees.api.url }}
 
-            - URL: ${{ cloudbees.api.url }}
-
-             ## Commit Information
+           ## Commit Information
             - **Commit ID:** "${{ needs.Checkout.outputs.commit_id }}"
-
             - **Commit Message:** "${{ needs.Checkout.outputs.commit_msg }}"
-
             - **Unit Test Results:** "${{ needs.Build.outputs.unitTestResults }}"
 
-            ## SonarQube Analysis Results
+             ## SonarQube Analysis Results
             | Severity And Issue Count |
             |------------------------|
-            |  ${{ needs.StaticAnalysis.outputs.BLOCKER_COUNT }} |
-            |  ${{ needs.StaticAnalysis.outputs.CRITICAL_COUNT }} |
-            |  ${{ needs.StaticAnalysis.outputs.MAJOR_COUNT }} |
-            |  ${{ needs.StaticAnalysis.outputs.MINOR_COUNT }} |
+            |  Blocker: ${{ needs.StaticAnalysis.outputs.BLOCKER_COUNT }} |
+            |  Critical: ${{ needs.StaticAnalysis.outputs.CRITICAL_COUNT }} |
+            |  Major: ${{ needs.StaticAnalysis.outputs.MAJOR_COUNT }} |
+            |  Minor: ${{ needs.StaticAnalysis.outputs.MINOR_COUNT }} |
 
-            ## Vulnerability Counts
-            - **Total Vulnerabilities:** "${{ needs.StaticAnalysis.outputs.TOTAL_VULNERABILITIES }}"
-            - **Open Vulnerabilities:** "${{ needs.StaticAnalysis.outputs.OPEN_VULNERABILITIES }}"
-            - **Reopened Vulnerabilities:** "${{ needs.StaticAnalysis.outputs.REOPENED_VULNERABILITIES }}"
-            - **Resolved Vulnerabilities:** "${{ needs.StaticAnalysis.outputs.RESOLVED_VULNERABILITIES }}"
-
-           
+            | Status And Issue Count |
+            |------------------------|
+            |  Open: ${{ needs.StaticAnalysis.outputs.OPEN_COUNT }} |
+            |  Reopened: ${{ needs.StaticAnalysis.outputs.REOPENED_COUNT }} |
+            |  Resolved: ${{ needs.StaticAnalysis.outputs.RESOLVED_COUNT }} |
