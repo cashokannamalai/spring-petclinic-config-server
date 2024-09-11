@@ -127,7 +127,7 @@ jobs:
 
 
   Deploy:
-    needs: SmokeTest
+    needs: StaticAnalysis
     kind: deploy
     steps:
       - name: Checkout
