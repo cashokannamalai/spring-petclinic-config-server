@@ -85,18 +85,18 @@ jobs:
         id: FetchVulnerabilitiesOverview
         uses: docker://alpine/git:latest
         run: |
-          apk add --no-cache curl jq
-          curl -u ${{ secrets.username }}:${{ secrets.password }} \
-          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR&types=VULNERABILITY" \
-          -o sonar-vulnerabilities.json
-          TOTAL_VULNERABILITIES=$(jq '[.issues[]] | length' sonar-vulnerabilities.json)
-          OPEN_VULNERABILITIES=$(jq '[.issues[] | select(.status=="OPEN")] | length' sonar-vulnerabilities.json)
-          REOPENED_VULNERABILITIES=$(jq '[.issues[] | select(.status=="REOPENED")] | length' sonar-vulnerabilities.json)
-          RESOLVED_VULNERABILITIES=$(jq '[.issues[] | select(.status=="RESOLVED")] | length' sonar-vulnerabilities.json)
-          echo "TOTAL_VULNERABILITIES=${TOTAL_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/TOTAL_VULNERABILITIES
-          echo "OPEN_VULNERABILITIES=${OPEN_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/OPEN_VULNERABILITIES
-          echo "REOPENED_VULNERABILITIES=${REOPENED_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/REOPENED_VULNERABILITIES
-          echo "RESOLVED_VULNERABILITIES=${RESOLVED_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/RESOLVED_VULNERABILITIES
+           apk add --no-cache curl jq
+           curl -u ${{ secrets.username }}:${{ secrets.password }} \
+           "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR&types=VULNERABILITY" \
+            -o sonar-vulnerabilities.json
+           TOTAL_VULNERABILITIES=$(jq '[.issues[]] | length' sonar-vulnerabilities.json)
+           OPEN_VULNERABILITIES=$(jq '[.issues[] | select(.status=="OPEN")] | length' sonar-vulnerabilities.json)
+            REOPENED_VULNERABILITIES=$(jq '[.issues[] | select(.status=="REOPENED")] | length' sonar-vulnerabilities.json)
+            RESOLVED_VULNERABILITIES=$(jq '[.issues[] | select(.status=="RESOLVED")] | length' sonar-vulnerabilities.json)
+            echo "TOTAL_VULNERABILITIES=${TOTAL_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/TOTAL_VULNERABILITIES
+            echo "OPEN_VULNERABILITIES=${OPEN_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/OPEN_VULNERABILITIES
+            echo "REOPENED_VULNERABILITIES=${REOPENED_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/REOPENED_VULNERABILITIES
+            echo "RESOLVED_VULNERABILITIES=${RESOLVED_VULNERABILITIES}" >> $CLOUDBEES_OUTPUTS/RESOLVED_VULNERABILITIES
 
 
 
