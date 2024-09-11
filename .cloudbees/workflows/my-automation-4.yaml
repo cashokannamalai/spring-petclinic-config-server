@@ -50,8 +50,10 @@ jobs:
     environment: sampleflag
     steps:
       - name: Fetch SonarQube Vulnerabilities
-        uses: docker://curlimages/curl:latest
+        uses: docker://alpine:latest
         run: |
+          apk add --no-cache jq curl
+
           # Fetch the project key from your SonarQube instance
           PROJECT_KEY="spring-petclinic-config-server"
           SONAR_HOST="https://sonarqube.cb-demos.io"
