@@ -10,6 +10,18 @@ jobs:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
+      - name: Get Commit Info
+        uses: docker://alpine/git:latest
+        id: commitinfo
+        run: |
+          COMMIT_ID=$(git rev-parse HEAD)
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
+          echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
+    outputs:
+      commit_id: ${{ steps.commitinfo.outputs.commit_id }}
+      commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
+
   Build:
     needs: Checkout
     steps:
@@ -23,6 +35,16 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-          mvn test
+      - name: Run OWASP Dependency-Check
+        id: dependencycheck
+        uses: docker://owasp/dependency-check:latest
+        run: |
+          dependency-check --project "spring-petclinic-config-server" --format "HTML" --out "${CLOUDBEES_OUTPUTS}/dependency-check-report.html" .
+      - name: RunUnitTest
+        id: RunUnitTest
+        uses: docker://maven:3-eclipse-temurin-17
+        run: >
+          mvn test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
 
-          
+          cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1
+          > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
