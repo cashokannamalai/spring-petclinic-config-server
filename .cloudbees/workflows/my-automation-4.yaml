@@ -10,7 +10,6 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: cloudbees-io/checkout@v1
-
   Build:
     needs: Checkout
     environment: sampleflag
@@ -25,28 +24,43 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean package
-      - name: Run SonarQube Analysis
-        uses: docker://sonarsource/sonar-scanner-cli:latest
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=spring-petclinic-config-server \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=https://sonarqube.cb-demos.io \
-            -Dsonar.login=${{ secrets.token }} \
-            -Dsonar.java.binaries=target/classes
-      - name: Get Vulnerability Report
+          mvn cyclonedx:makeBom
+  SonarQube:
+    needs: Build
+    environment: sampleflag
+    steps:
+      - name: Checkout Source Code
+        uses: cloudbees-io/checkout@v1
+      - name: Configure SonarQube Scanner
         uses: docker://alpine/git:latest
         run: |
-          # Fetch the latest analysis report
-          curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server" \
-            -H "Authorization: Bearer ${{ secrets.token }}" \
-            | jq '.total' > total_vulnerabilities.txt
-          curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server&statuses=OPEN" \
-            -H "Authorization: Bearer ${{ secrets.token }}" \
-            | jq '.total' > open_vulnerabilities.txt
-          curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server&statuses=REOPENED" \
-            -H "Authorization: Bearer ${{ secrets.token }}" \
-            | jq '.total' > reopened_vulnerabilities.txt
-          curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server&statuses=RESOLVED" \
-            -H "Authorization: Bearer ${{ secrets.token }}" \
-            | jq '.total' > resolved_vulnerabilities.txt
+          mkdir -p ~/.sonar
+          echo "sonar.host.url=https://sonarqube.cb-demos.io/" > ~/.sonar/sonar.properties
+          echo "sonar.login=85c8d567a7234061041a0149cb28841003f82831" >> ~/.sonar/sonar.properties
+      - name: Run SonarQube Scanner
+        uses: docker://maven:3-eclipse-temurin-17
+        run: |
+          mvn sonar:sonar -Dsonar.projectKey=config-server -Dsonar.host.url=https://sonarqube.cb-demos.io/ -Dsonar.login=85c8d567a7234061041a0149cb28841003f82831
+  SonarQubeReport:
+    needs: SonarQube
+    environment: sampleflag
+    steps:
+      - name: Fetch SonarQube Vulnerabilities
+        uses: docker://alpine:latest
+        run: |
+          apk add --no-cache jq curl
+          # Fetch the project key from your SonarQube instance
+          PROJECT_KEY="spring-petclinic-config-server"
+          SONAR_HOST="https://sonarqube.cb-demos.io"
+          SONAR_TOKEN="85c8d567a7234061041a0149cb28841003f82831"
+          # Request vulnerability metrics
+          RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" "${SONAR_HOST}/api/issues/search?projectKeys=${PROJECT_KEY}&types=VULNERABILITY")
+          # Extract and display relevant information
+          TOTAL=$(echo $RESPONSE | jq '.total')
+          OPEN=$(echo $RESPONSE | jq '.issues[] | select(.status == "OPEN") | length')
+          REOPENED=$(echo $RESPONSE | jq '.issues[] | select(.status == "REOPENED") | length')
+          RESOLVED=$(echo $RESPONSE | jq '.issues[] | select(.status == "RESOLVED") | length')
+          echo "Total Vulnerabilities Found: ${TOTAL}"
+          echo "Open Vulnerabilities: ${OPEN}"
+          echo "Reopened Vulnerabilities: ${REOPENED}"
+          echo "Resolved Vulnerabilities: ${RESOLVED}"
