@@ -29,11 +29,7 @@ jobs:
   Scan:
     needs: Build
     steps:
-      - name: Install Snyk CLI
-        uses: docker://node:18
-        run: |
-          npm install -g snyk
       - name: Run Snyk Security Scan
-        uses: docker://maven:3-eclipse-temurin-17
+        uses: docker://snyk/snyk-cli:latest
         run: |
           snyk test
