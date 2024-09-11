@@ -15,16 +15,9 @@
  */
 package org.springframework.samples.petclinic.config;
 
-
-import io.rollout.rox.server.Rox;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.config.server.EnableConfigServer;
-
-import java.util.concurrent.ExecutionException;
-
 
 /**
  * @author Maciej Szarlinski
@@ -33,22 +26,7 @@ import java.util.concurrent.ExecutionException;
 @SpringBootApplication
 public class ConfigServerApplication {
 
-
-	private static final Logger log = LoggerFactory.getLogger(ConfigServerApplication.class);
-
-	public static void main(String[] args) throws ExecutionException, InterruptedException {
+	public static void main(String[] args) {
 		SpringApplication.run(ConfigServerApplication.class, args);
-		Flags flags = new Flags();
-
-		// Register the flags container under a namespace
-		Rox.register("default", flags);
-
-		// Setup connection with the feature management environment key
-		Rox.setup("7d77f2ce-ada9-4276-564c-ac004dc6c37e").get();
-
-		// Check and print the value of the 'enableTutorial' flag
-		boolean isTutorialEnabled = flags.enableTutorial.isEnabled();
-		log.info("enableTutorial value is {}", isTutorialEnabled ? "true" : "false");
-
 	}
 }
