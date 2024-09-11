@@ -38,14 +38,14 @@ jobs:
         run: |
           # Fetch the latest analysis report
           curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server" \
-            -H "Authorization: Bearer $SONARQUBE_TOKEN" \
+            -H "Authorization: Bearer ${{ secrets.token }}" \
             | jq '.total' > total_vulnerabilities.txt
           curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server&statuses=OPEN" \
-            -H "Authorization: Bearer $SONARQUBE_TOKEN" \
+            -H "Authorization: Bearer ${{ secrets.token }}" \
             | jq '.total' > open_vulnerabilities.txt
           curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server&statuses=REOPENED" \
-            -H "Authorization: Bearer $SONARQUBE_TOKEN" \
+            -H "Authorization: Bearer ${{ secrets.token }}" \
             | jq '.total' > reopened_vulnerabilities.txt
           curl -X GET "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server&statuses=RESOLVED" \
-            -H "Authorization: Bearer $SONARQUBE_TOKEN" \
+            -H "Authorization: Bearer ${{ secrets.token }}" \
             | jq '.total' > resolved_vulnerabilities.txt
