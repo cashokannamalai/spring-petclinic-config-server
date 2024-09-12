@@ -207,16 +207,13 @@ jobs:
 
             - **Unit Test Results:** "${{ needs.Build.outputs.unitTestResults
             }}"
-            ## SonarQube Analysis Results
-            | Severity And Issue Count |
-
-            |------------------------|
-
-            |  ${{ needs.StaticAnalysis.outputs.BLOCKER_COUNT }} |
-
-            |  ${{ needs.StaticAnalysis.outputs.CRITICAL_COUNT }} |
-
-            |  ${{ needs.StaticAnalysis.outputs.MAJOR_COUNT }} |
-
-            |  ${{ needs.StaticAnalysis.outputs.MINOR_COUNT }} |
- 
+           
+           
+             ## SonarQube Analysis Results
+          
+             |       Severity And Issue Count                     |
+             |----------------------- ----------------------------|
+             | ${{ needs.StaticAnalysis.outputs.BLOCKER_COUNT }}  |
+             | ${{ needs.StaticAnalysis.outputs.CRITICAL_COUNT }} |
+             | ${{ needs.StaticAnalysis.outputs.MAJOR_COUNT }}    |
+             | ${{ needs.StaticAnalysis.outputs.MINOR_COUNT }}    |
