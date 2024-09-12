@@ -221,4 +221,3 @@ jobs:
 
             |  ${{ needs.StaticAnalysis.outputs.MINOR_COUNT }} |
  
-
