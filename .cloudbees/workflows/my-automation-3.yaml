@@ -191,7 +191,6 @@ jobs:
     needs:
       - Deploy
       - Build
-      - Checkout
       - StaticAnalysis
     steps:
       - uses: cloudbees-io/publish-evidence-item@v1
