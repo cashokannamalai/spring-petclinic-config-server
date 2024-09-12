@@ -4,7 +4,7 @@ name: My automation
 on:
   push:
     branches:
-      - ashok
+      - main
 jobs:
   Checkout:
     steps:
@@ -51,10 +51,7 @@ jobs:
           token: ${{ secrets.GITHUB_SECRET }}
           language: "LANGUAGE_JAVA"
 
-      - name: Scan with Find Security Bugs
-        uses: cloudbees-io/findsecbugs-sast-scan-code@v1
-        with:
-          language: "LANGUAGE_JAVA"
+     
 
       - name: Scan with SonarQube
         uses: cloudbees-io/sonarqube-sast-scan-code@v1
@@ -64,21 +61,10 @@ jobs:
           password: ${{ secrets.password }}
           language: "LANGUAGE_JAVA"
 
-      - name: Run TruffleHog secret scan with threshold
-        uses: cloudbees-io/trufflehog-secret-scan-code@v1
-        with:
-          branch: main
+      - name: Scan with SonarQube bundled action
+        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
+        kind: scan
+
         
       
 
-      - name: Configure SonarQube Scanner
-        uses: docker://alpine/git:latest
-        run: |
-          mkdir -p ~/.sonar
-          echo "sonar.host.url=https://sonarqube.cb-demos.io/" > ~/.sonar/sonar.properties
-          echo "sonar.login=85c8d567a7234061041a0149cb28841003f82831" >> ~/.sonar/sonar.properties
-      - name: Run SonarQube Scanner
-        uses: docker://maven:3-eclipse-temurin-17
-        run: |
-          mvn sonar:sonar -Dsonar.projectKey=config-server -Dsonar.host.url=https://sonarqube.cb-demos.io/ -
-          
