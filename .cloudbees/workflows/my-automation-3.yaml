@@ -75,3 +75,4 @@ jobs:
         uses: cloudbees-io/trufflehog-secret-scan-code@v1
         with:
           branch: ${{ cloudbees.scm.branch }}
+          
