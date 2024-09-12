@@ -72,7 +72,7 @@ jobs:
       - name: Scan with SonarQube bundled
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
         with:
-          sonar-exclusion: sonar/*
-          cover-file-name: ./coverage.xml
+          sonar-exclusion: src/main/java/org/springframework/samples/petclinic/config
+          cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
-          extra-args: "-Dsonar.java.binaries=target/classes"
+          
