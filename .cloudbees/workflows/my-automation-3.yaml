@@ -75,7 +75,7 @@ jobs:
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
         with:
           sonar-exclusion: src/main/java/org/springframework/samples/petclinic/config
-          cover-file-name: ./coverage.xml
+          cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
           threshold-critical: 0
           threshold-very-high: 0
