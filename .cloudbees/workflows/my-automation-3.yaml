@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - ashok
+      
 jobs:
   Checkout:
     steps:
@@ -24,6 +25,8 @@ jobs:
 
   Build:
     needs: Checkout
+    outputs:
+      unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}
     steps:
       - name: Configure git
         uses: docker://alpine/git:latest
@@ -35,16 +38,48 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-      - name: Run OWASP Dependency-Check
-        id: dependencycheck
-        uses: docker://owasp/dependency-check:latest
-        run: |
-          dependency-check --project "spring-petclinic-config-server" --format "HTML" --out "${CLOUDBEES_OUTPUTS}/dependency-check-report.html" .
       - name: RunUnitTest
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
         run: >
           mvn test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
-
           cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1
           > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
+
+      - name: Scan with GitHub Advanced Security
+        uses: cloudbees-io/github-security-sast-scan-code@v1
+        with:
+          token: ${{ secrets.GITHUB_SECRET }}
+          language: "LANGUAGE_JAVA"
+
+      - name: Scan with Find Security Bugs
+        uses: cloudbees-io/findsecbugs-sast-scan-code@v1
+        with:
+          language: "LANGUAGE_JAVA"
+
+      - name: Scan with SonarQube
+        uses: cloudbees-io/sonarqube-sast-scan-code@v1
+        with:
+          server-url: https://sonarqube.cb-demos.io
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
+          language: "LANGUAGE_JAVA"
+
+      - name: Run TruffleHog secret scan with threshold
+        uses: cloudbees-io/trufflehog-secret-scan-code@v1
+        with:
+          branch: main
+        
+      
+
+      - name: Configure SonarQube Scanner
+        uses: docker://alpine/git:latest
+        run: |
+          mkdir -p ~/.sonar
+          echo "sonar.host.url=https://sonarqube.cb-demos.io/" > ~/.sonar/sonar.properties
+          echo "sonar.login=85c8d567a7234061041a0149cb28841003f82831" >> ~/.sonar/sonar.properties
+      - name: Run SonarQube Scanner
+        uses: docker://maven:3-eclipse-temurin-17
+        run: |
+          mvn sonar:sonar -Dsonar.projectKey=config-server -Dsonar.host.url=https://sonarqube.cb-demos.io/ -
+          
