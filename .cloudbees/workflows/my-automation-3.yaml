@@ -63,3 +63,9 @@ jobs:
           username: ${{ secrets.username }}
           password: ${{ secrets.password }}
           language: "LANGUAGE_JAVA"
+
+      - name: Run TruffleHog secret scan with threshold
+        uses: cloudbees-io/trufflehog-secret-scan-code@v1
+        with:
+          branch: main
+          threshold-very-high: 3
