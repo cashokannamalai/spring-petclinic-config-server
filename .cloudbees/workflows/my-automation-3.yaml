@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - ashok
-      
 jobs:
   Checkout:
     steps:
@@ -72,14 +71,15 @@ jobs:
         
       
 
-      - name: Configure SonarQube Scanner
-        uses: docker://alpine/git:latest
-        run: |
-          mkdir -p ~/.sonar
-          echo "sonar.host.url=https://sonarqube.cb-demos.io/" > ~/.sonar/sonar.properties
-          echo "sonar.login=85c8d567a7234061041a0149cb28841003f82831" >> ~/.sonar/sonar.properties
-      - name: Run SonarQube Scanner
-        uses: docker://maven:3-eclipse-temurin-17
-        run: |
-          mvn sonar:sonar -Dsonar.projectKey=config-server -Dsonar.host.url=https://sonarqube.cb-demos.io/ -
-          
+      
+      - name: Scan with SonarQube bundled
+        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
+        with:
+          sonar-exclusion: sonar/*
+          cover-file-name: ./coverage.xml
+          language: LANGUAGE_PYTHON
+          threshold-critical: 0
+          threshold-very-high: 0
+          threshold-high: 0
+          threshold-medium: 0
+          threshold-low: 0
