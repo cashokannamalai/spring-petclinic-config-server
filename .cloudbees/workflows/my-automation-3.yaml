@@ -68,4 +68,4 @@ jobs:
         uses: cloudbees-io/trufflehog-secret-scan-code@v1
         with:
           branch: main
-          threshold-very-high: 3
+        
