@@ -74,7 +74,7 @@ jobs:
         uses: cloudbees-io/publish-test-results@v1
         with:
          test-type: JUnit
-         folder-name: src/test/java/org/springframework/samples/petclinic/config
+         folder-name: src/test
 
       - name: Check out source code
         uses: cloudbees-io/checkout@v1
