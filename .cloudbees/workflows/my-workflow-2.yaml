@@ -1,0 +1,23 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: My workflow
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  run-gha-workflow:
+    steps:
+      - name: Run GHA workflow
+        uses: cloudbees-io/ghactions-run-workflow@v2
+        with:
+          url: https://github.com/cashokannamalai/spring-petclinic-config-server.git
+          token: ${{ secrets.GITHUB_SECRET }}
+          org-name: ashok
+          repo-name: spring-petclinic-config-server
+          branch-name: main
+          workflow-name: My workflow
+          test-type: Junit
+          test-result-location: junit-service*
