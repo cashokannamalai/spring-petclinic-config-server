@@ -55,3 +55,11 @@ jobs:
         uses: cloudbees-io/findsecbugs-sast-scan-code@v1
         with:
           language: "LANGUAGE_JAVA"
+
+      - name: Scan with SonarQube
+        uses: cloudbees-io/sonarqube-sast-scan-code@v1
+        with:
+          server-url: https://sonarqube.cb-demos.io
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
+          language: "LANGUAGE_JAVA"
