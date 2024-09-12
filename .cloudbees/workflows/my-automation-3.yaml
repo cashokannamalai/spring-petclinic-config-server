@@ -75,6 +75,16 @@ jobs:
         with:
          test-type: JUnit
          folder-name: src/test/java/org/springframework/samples/petclinic/config
+
+      - name: Check out source code
+        uses: cloudbees-io/checkout@v1
+        with:
+          fetch-depth: 0 # Fetch the full history
+
+      - name: Run TruffleHog scan on full history
+        uses: cloudbees-io/trufflehog-secret-scan-code@v1
+        with:
+          branch: ${{ cloudbees.scm.branch }}
         
 
         
