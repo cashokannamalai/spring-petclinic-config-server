@@ -76,7 +76,7 @@ jobs:
         with:
           sonar-exclusion: src/main/java/org/springframework/samples/petclinic/config
           cover-file-name: ./coverage.xml
-          language: LANGUAGE_PYTHON
+          language: LANGUAGE_JAVA
           threshold-critical: 0
           threshold-very-high: 0
           threshold-high: 0
