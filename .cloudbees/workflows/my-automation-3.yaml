@@ -202,7 +202,7 @@ jobs:
             - URL: ${{ cloudbees.api.url }}
 
              ## Commit Information
-            - **Commit ID:** "${{ needs.Checkout.outputs.commit_id }}"
+            - **Commit ID:** "${{ needs.Build.outputs.commit_id }}"
 
             - **Commit Message:** "${{ needs.Build.outputs.commit_msg }}"
 
