@@ -69,6 +69,12 @@ jobs:
         uses: cloudbees-io/findsecbugs-sast-scan-code@v1
         with:
           language: "LANGUAGE_JAVA"
+
+      - name: Publish test results
+        uses: cloudbees-io/publish-test-results@v1
+        with:
+         test-type: JUnit
+         folder-name: src/test/java/org/springframework/samples/petclinic/config
         
 
         
