@@ -65,6 +65,12 @@ jobs:
       MAJOR_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }}
       MINOR_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }}
     steps:
+      - name: Scan with GitHub Advanced Security
+        uses: cloudbees-io/github-security-sast-scan-code@v1
+        with:
+          token: ${{ secrets.GITHUB_SECRET }}
+          language: "LANGUAGE_JAVA"
+          
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
         name: Scan
         kind: scan
