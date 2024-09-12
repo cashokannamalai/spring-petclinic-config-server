@@ -75,3 +75,4 @@ jobs:
           sonar-exclusion: sonar/*
           cover-file-name: ./coverage.xml
           language: LANGUAGE_JAVA
+          extra-args: "-Dsonar.java.binaries=target/classes"
