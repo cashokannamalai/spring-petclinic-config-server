@@ -51,14 +51,7 @@ jobs:
           token: ${{ secrets.GITHUB_SECRET }}
           language: "LANGUAGE_JAVA"
 
-      - name: Scan with SonarQube bundled
-        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
+      - name: Scan with Find Security Bugs
+        uses: cloudbees-io/findsecbugs-sast-scan-code@v1
         with:
-          sonar-exclusion: sonar/*
-          cover-file-name: ./pom.xml
-          language: LANGUAGE_JAVA
-          threshold-critical: 0
-          threshold-very-high: 0
-          threshold-high: 0
-          threshold-medium: 0
-          threshold-low: 0
+          language: "LANGUAGE_JAVA"
