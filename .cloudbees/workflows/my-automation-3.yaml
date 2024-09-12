@@ -2,7 +2,7 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
-  push:
+  pull_request:
     branches:
       - ashok
 jobs:
@@ -21,7 +21,6 @@ jobs:
     outputs:
       commit_id: ${{ steps.commitinfo.outputs.commit_id }}
       commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
-
   Build:
     needs: Checkout
     outputs:
@@ -41,44 +40,38 @@ jobs:
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
         run: >
-          mvn test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
-          cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1
-          > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
-
+          mvn test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio" cat
+          "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1 >
+          "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
       - name: Scan with GitHub Advanced Security
         uses: cloudbees-io/github-security-sast-scan-code@v1
         with:
           token: ${{ secrets.GITHUB_SECRET }}
-          language: "LANGUAGE_JAVA"
-
-      - name: Scan with Find Security Bugs
-        uses: cloudbees-io/findsecbugs-sast-scan-code@v1
-        with:
-          language: "LANGUAGE_JAVA"
-
+          language: LANGUAGE_JAVA
       - name: Scan with SonarQube
         uses: cloudbees-io/sonarqube-sast-scan-code@v1
         with:
           server-url: https://sonarqube.cb-demos.io
           username: ${{ secrets.username }}
           password: ${{ secrets.password }}
-          language: "LANGUAGE_JAVA"
-
-      - name: Run TruffleHog secret scan with threshold
+          language: LANGUAGE_JAVA
+      - name: Scan with SonarQube bundled action
+        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
+        kind: scan
+      - name: Scan with Find Security Bugs
+        uses: cloudbees-io/findsecbugs-sast-scan-code@v1
+        with:
+          language: LANGUAGE_JAVA
+      - name: Publish test results
+        uses: cloudbees-io/publish-test-results@v1
+        with:
+          test-type: JUnit
+          folder-name: src/test
+      - name: Check out source code
+        uses: cloudbees-io/checkout@v1
+        with:
+          fetch-depth: 0
+      - name: Run TruffleHog scan on full history
         uses: cloudbees-io/trufflehog-secret-scan-code@v1
         with:
-          branch: main
-        
-      
-
-      - name: Scan with SonarQube bundled
-        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
-        with:
-          sonar-exclusion: src/main/java/org/springframework/samples/petclinic/config
-          cover-file-name: ./pom.xml
-          language: LANGUAGE_JAVA
-          threshold-critical: 0
-          threshold-very-high: 0
-          threshold-high: 0
-          threshold-medium: 0
-          threshold-low: 0
+          branch: ${{ cloudbees.scm.branch }}
