@@ -73,15 +73,17 @@ jobs:
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
 
 
-      - name: Run Octopus Deploy
-        uses: cloudbees-io/octopus-run-project@v2
+      - name: Deploy to GKE
+        id: k8s-kustomize-deploy
+        uses: cloudbees-io/kustomize-deploy@v1
+        env:
+          KUBECONFIG: ${{ secrets.GKE_KUBECONFIG }}  # Kubeconfig file stored in secrets
+          IMAGE_NAME: "caannamalai/configserver:3.2.4"
+          PORT: "80"
         with:
-          url: https://vimanthan.octopus.app/
-          token: API-GSXA89ARJYZ5L8SUV4IMUL5JG2REALO
-          space-name: Default
-          release: 1.0.0
-          environment-name: Development
-          channel-name: Default
+           kustomization-base-dir: ${{ cloudbees.workspace }}/base
+           kustomization-overlays-dir: ${{ cloudbees.workspace }}/overlays/dev
+           environment-variables: '{"IMAGE_NAME":"caannamalai/configserver:3.2.4","PORT":8888}'
 
         
 
