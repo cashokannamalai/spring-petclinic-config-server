@@ -16,8 +16,13 @@ jobs:
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
+
+
+
       - name: Checkout
         uses: cloudbees-io/checkout@v1
+
+
       - name: Get Commit Info
         uses: docker://alpine/git:latest
         id: commitinfo
@@ -26,10 +31,19 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-      - name: Build
-        uses: docker://maven:3-eclipse-temurin-17
+
+
+
+      
+
+
+      - uses: "uses: docker://maven:3-eclipse-temurin-17"
+        name: sample
+        kind: build
         run: |
           mvn clean install
+
+          
       - name: RunUnitTest
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
@@ -60,10 +74,4 @@ jobs:
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
 
         
-  Build12:
-    steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-      - uses: "uses: docker://maven:3-eclipse-temurin-17"
-        name: sample
-        kind: build
+
