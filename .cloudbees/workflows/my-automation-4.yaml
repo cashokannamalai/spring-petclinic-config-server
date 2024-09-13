@@ -5,8 +5,7 @@ on:
   push:
     branches:
       - ashok
-      
-jobs:    
+jobs:
   Build:
     outputs:
       unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}
@@ -19,7 +18,6 @@ jobs:
           git config --global --add safe.directory /cloudbees/workspace
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-
       - name: Get Commit Info
         uses: docker://alpine/git:latest
         id: commitinfo
@@ -28,12 +26,10 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-      
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-
       - name: RunUnitTest
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
@@ -42,22 +38,15 @@ jobs:
 
           cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1
           > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
-
-      
   StaticAnalysis:
     steps:
       - name: Checkout Source Code
         uses: cloudbees-io/checkout@v1
-
-
       - name: Scan with GitHub Advanced Security
         uses: cloudbees-io/github-security-sast-scan-code@v1
         with:
           token: ${{ secrets.GITHUB_SECRET }}
-          language: "LANGUAGE_JAVA"
-          
-     
-
+          language: LANGUAGE_JAVA
       - name: SonarQube Scan
         uses: docker://maven:3-eclipse-temurin-17
         env:
@@ -67,6 +56,12 @@ jobs:
             -Dsonar.projectKey=spring-petclinic-config-server \
             -Dsonar.host.url=https://sonarqube.cb-demos.io \
             -Dsonar.login=${SONAR_TOKEN}
-
       - name: Scan with SonarQube bundled action
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
+
+        
+  Build12:
+    steps:
+      - uses: "uses: docker://maven:3-eclipse-temurin-17"
+        name: sample
+        kind: build
