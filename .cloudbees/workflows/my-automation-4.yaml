@@ -4,7 +4,7 @@ name: My automation
 on:
   push:
     branches:
-      - ashok
+      - main
 jobs:
   Build:
     outputs:
@@ -77,12 +77,12 @@ jobs:
         id: k8s-kustomize-deploy
         uses: cloudbees-io/kustomize-deploy@v1
         env:
-          KUBECONFIG: ${{ secrets.GKE_KUBECONFIG }}  # Kubeconfig file stored in secrets
+          KUBECONFIG: ${{ secrets.GKE_KUBECONFIG }}  
           IMAGE_NAME: "caannamalai/configserver:3.2.4"
           PORT: "80"
         with:
-           kustomization-base-dir: ${{ cloudbees.workspace }}/base
-           kustomization-overlays-dir: ${{ cloudbees.workspace }}/overlays/dev
+           kustomization-base-dir: ${{ cloudbees.workspace }}/deployment-service.yaml
+           kustomization-overlays-dir: ${{ cloudbees.workspace }}/deployment-service.yaml
            environment-variables: '{"IMAGE_NAME":"caannamalai/configserver:3.2.4","PORT":8888}'
 
         
