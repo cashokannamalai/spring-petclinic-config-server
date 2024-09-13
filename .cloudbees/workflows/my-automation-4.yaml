@@ -36,9 +36,8 @@ jobs:
 
       
 
-
-      - uses: "uses: docker://maven:3-eclipse-temurin-17"
-        name: sample
+      - name: Build Java app
+        uses: "uses: docker://maven:3-eclipse-temurin-17"
         kind: build
         run: |
           mvn clean install
