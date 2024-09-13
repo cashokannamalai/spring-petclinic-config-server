@@ -46,20 +46,24 @@ jobs:
       
   StaticAnalysis:
     steps:
+      - name: Checkout Source Code
+        uses: cloudbees-io/checkout@v1
+
+
       - name: Scan with GitHub Advanced Security
         uses: cloudbees-io/github-security-sast-scan-code@v1
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: "LANGUAGE_JAVA"
           
-      - name: Checkout Source Code
-        uses: cloudbees-io/checkout@v1
+     
+
       - name: Configure SonarQube Scanner
         uses: docker://alpine/git:latest
         run: |
           mkdir -p ~/.sonar
           echo "sonar.host.url=https://sonarqube.cb-demos.io/" > ~/.sonar/sonar.properties
-          echo "sonar.login=85c8d567a7234061041a0149cb28841003f82831" >> ~/.sonar/sonar.properties
+          echo "sonar.login=${{ secrets.token }}" >> ~/.sonar/sonar.properties
       - name: Run SonarQube Scanner
         uses: docker://maven:3-eclipse-temurin-17
         run: |
