@@ -43,21 +43,7 @@ jobs:
           cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1
           > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
 
-      - name: Configure container registry credentials
-        id: dockerconfig
-        uses: cloudbees-io/configure-oci-credentials@v1
-        with:
-          registry: ${{ secrets.STAGING_DOCKER_REGISTRY }}
-          username: ${{ secrets.STAGING_DOCKER_USERNAME }}
-          password: ${{ secrets.STAGING_DOCKER_PASSWORD }}
-      - name: Push image to OCI registry
-        uses: cloudbees-io/kaniko@v1
-        with:
-          dockerfile: Dockerfile
-          context: .
-          destination: ${{ secrets.STAGING_DOCKER_REGISTRY }}/${{
-            secrets.STAGING_DOCKER_USERNAME }}/configserver:3.2.4
-
+      
   StaticAnalysis:
     needs: Build
     outputs:
