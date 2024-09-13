@@ -62,6 +62,8 @@ jobs:
         
   Build12:
     steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
       - uses: "uses: docker://maven:3-eclipse-temurin-17"
         name: sample
         kind: build
