@@ -15,6 +15,13 @@
         <docker.image.dockerfile.dir>${basedir}/../docker</docker.image.dockerfile.dir>
         <spring-cloud.version>2022.0.3</spring-cloud.version>
         <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
+        <sonar.projectKey>spring-petclinic-config-server</sonar.projectKey>
+    <sonar.projectName>spring-petclinic-config-server</sonar.projectName>
+    <sonar.projectVersion>1.0</sonar.projectVersion>
+    <sonar.sources>src/main/java</sonar.sources>
+    <sonar.tests>src/test/java</sonar.tests>
+    <sonar.host.url>https://sonarqube.cb-demos.io/</sonar.host.url>
+    <sonar.login>${env.SONAR_TOKEN}</sonar.login>
     </properties>
 
     <dependencyManagement>
@@ -132,6 +139,7 @@
                     <target>17</target>
                 </configuration>
             </plugin>
+    
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
