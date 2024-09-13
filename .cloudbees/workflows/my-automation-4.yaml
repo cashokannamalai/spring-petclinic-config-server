@@ -58,13 +58,12 @@ jobs:
           
      
 
-      - name: Configure SonarQube Scanner
-        uses: docker://alpine/git:latest
-        run: |
-          mkdir -p ~/.sonar
-          echo "sonar.host.url=https://sonarqube.cb-demos.io/" > ~/.sonar/sonar.properties
-          echo "sonar.login=${{ secrets.token }}" >> ~/.sonar/sonar.properties
-      - name: Run SonarQube Scanner
+      - name: SonarQube Scan
         uses: docker://maven:3-eclipse-temurin-17
+        env:
+          SONAR_TOKEN: ${{ secrets.token }}
         run: |
-          mvn sonar:sonar -Dsonar.projectKey=config-server -Dsonar.host.url=https://sonarqube.cb-demos.io/ -
+          mvn sonar:sonar \
+            -Dsonar.projectKey=spring-petclinic-config-server \
+            -Dsonar.host.url=https://sonarqube.cb-demos.io \
+            -Dsonar.login=${SONAR_TOKEN}
