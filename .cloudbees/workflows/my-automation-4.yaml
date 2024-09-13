@@ -51,6 +51,7 @@ jobs:
           cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1
           > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
   StaticAnalysis:
+    needs: Build
     steps:
       - name: Checkout Source Code
         uses: cloudbees-io/checkout@v1
@@ -70,6 +71,17 @@ jobs:
             -Dsonar.login=${SONAR_TOKEN}
       - name: Scan with SonarQube bundled action
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
+
+
+      - name: Run Octopus Deploy
+        uses: cloudbees-io/octopus-run-project@v2
+        with:
+          url: https://vimanthan.octopus.app/
+          token: API-GSXA89ARJYZ5L8SUV4IMUL5JG2REALO
+          space-name: Default
+          release: 1.0.0
+          environment-name: Development
+          channel-name: Default
 
         
 
