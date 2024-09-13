@@ -67,3 +67,6 @@ jobs:
             -Dsonar.projectKey=spring-petclinic-config-server \
             -Dsonar.host.url=https://sonarqube.cb-demos.io \
             -Dsonar.login=${SONAR_TOKEN}
+
+      - name: Scan with SonarQube bundled action
+        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
