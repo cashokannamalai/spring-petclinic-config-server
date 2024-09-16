@@ -10,3 +10,4 @@ patchesStrategicMerge:
 
 commonLabels:
   environment: dev
+  overlays
