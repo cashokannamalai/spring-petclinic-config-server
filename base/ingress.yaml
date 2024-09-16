@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: configserver-ingress
+  namespace: ashok
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: ""
+      http:
+        paths:
+          - path: /config
+            pathType: Prefix
+            backend:
+              service:
+                name: configserver-service
+                port:
+                  number: 8888
