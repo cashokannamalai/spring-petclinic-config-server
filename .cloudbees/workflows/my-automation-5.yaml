@@ -10,7 +10,6 @@ jobs:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-
   Build:
     needs: Checkout
     steps:
@@ -20,25 +19,23 @@ jobs:
           git config --global --add safe.directory /cloudbees/workspace
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-        
       - uses: cloudbees-io/cbci-run-job@v2
         name: Build
         kind: build
         with:
           url: https://sda.preview.cb-demos.io/ashok-petclinic/
-          username:  c_aannamalai
+          username: c_aannamalai
           token: ${{ secrets.SNAQVI_CI_TOKEN }}
           job-name: spring-petclinic/job/spring-petclinic-config-server
           test-type: Junit
           test-result-location: testReport
-
   Deploy:
+    environment: dev
     needs: Build
     kind: Deploy
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-        
       - name: Set kubeconfig
         uses: cashokannamalai/kubeconfig@v1
         with:
@@ -52,9 +49,8 @@ jobs:
           kustomization-overlays-dir: ${{ cloudbees.workspace }}/overlays/dev
           environment-variables: '{"IMAGE_NAME":"configserver-deployment:3.2.4","PORT":8888}'
           
-
       - name: Track deployment status
         uses: docker://bitnami/kubectl:latest
         run: |
           kubectl rollout status deployment/configserver-deployment --namespace ashok
-          
+  
