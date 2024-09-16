@@ -31,3 +31,21 @@ jobs:
           job-name: spring-petclinic/job/spring-petclinic-config-server
           test-type: Junit
           test-result-location: testReport
+
+  Deploy:
+    needs: Build
+    kind: deploy
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+        
+      - uses: cashokannamalai/kubeconfig@v1
+        name: Set kubeconfig
+        with:
+          secname: ${{ secrets.kubeconfig }}
+
+      - id: k8s-kustomize-deploy
+        name: k8s-kustomize-deploy.
+        uses: cloudbees-io/kustomize-deploy@v1
+        with:
+          kustomization-base-dir: ${{ cloudbees.workspace }}/base
