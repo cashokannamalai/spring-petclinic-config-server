@@ -39,13 +39,16 @@ jobs:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
         
-      - uses: cashokannamalai/kubeconfig@v1
-        name: Set kubeconfig
+      - name: Set kubeconfig
+        uses: cashokannamalai/kubeconfig@v1
         with:
           secname: ${{ secrets.kubeconfig }}
 
-      - id: k8s-kustomize-deploy
-        name: k8s-kustomize-deploy.
+      - name: List Workspace Directory
+        uses: docker://alpine/git:latest
+        run: ls -la /cloudbees/workspace
+
+      - name: k8s-kustomize-deploy
         uses: cloudbees-io/kustomize-deploy@v1
         with:
-          kustomization-base-dir: ${{ cloudbees.workspace }}/base
+          kustomization-base-dir: /cloudbees/workspace/base
