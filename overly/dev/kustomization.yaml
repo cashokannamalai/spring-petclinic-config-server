@@ -1,0 +1,12 @@
+resources:
+  - base/deployment.yaml
+  - base/service.yaml
+  - base/ingress.yaml
+
+
+patchesStrategicMerge:
+  - deployment-patch.yaml
+  - service-patch.yaml
+
+commonLabels:
+  environment: dev
