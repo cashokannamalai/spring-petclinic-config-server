@@ -51,6 +51,6 @@ jobs:
           kustomization-base-dir: ${{ cloudbees.workspace }}/base
 
       - name: Track deployment status
-        uses: docker://alpine/git:latest
+        uses: docker://bitnami/kubectl:latest
         run: |
           kubectl rollout status deployment/configserver-deployment --namespace ashok
