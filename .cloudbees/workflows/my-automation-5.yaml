@@ -57,3 +57,4 @@ jobs:
         uses: docker://bitnami/kubectl:latest
         run: |
           kubectl rollout status deployment/configserver-deployment --namespace ashok
+          
