@@ -49,7 +49,6 @@ jobs:
         uses: cloudbees-io/kustomize-deploy@v1
         with:
           kustomization-base-dir: ${{ cloudbees.workspace }}/base
-          kustomization-overlays-dir: ${{ cloudbees.workspace }}/overlays/dev
 
       - name: Track deployment status
         uses: docker://alpine/git:latest
