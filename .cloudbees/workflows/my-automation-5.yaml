@@ -51,6 +51,7 @@ jobs:
           kustomization-base-dir: ${{ cloudbees.workspace }}/base
           kustomization-overlays-dir: ${{ cloudbees.workspace }}/overlays/dev
           environment-variables: '{"IMAGE_NAME":"configserver-deployment:3.2.4","PORT":8888}'
+          
 
       - name: Track deployment status
         uses: docker://bitnami/kubectl:latest
