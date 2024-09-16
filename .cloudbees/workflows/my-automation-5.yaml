@@ -48,7 +48,8 @@ jobs:
         uses: docker://alpine/git:latest
         run: ls -la /cloudbees/workspace
 
-      - name: k8s-kustomize-deploy
+      - id: k8s-kustomize-deploy
+        name: k8s-kustomize-deploy.
         uses: cloudbees-io/kustomize-deploy@v1
         with:
-          kustomization-base-dir: /cloudbees/workspace/base
+          kustomization-base-dir: ${{ cloudbees.workspace }}/base
