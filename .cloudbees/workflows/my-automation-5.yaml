@@ -45,10 +45,9 @@ jobs:
           secname: ${{ secrets.kubeconfig }}
 
       - id: k8s-kustomize-deploy
-        name: k8s-kustomize-deploy.
+        name: deploy
         uses: cloudbees-io/kustomize-deploy@v1
         with:
           kustomization-base-dir: ${{ cloudbees.workspace }}/base
-          kustomization-overlays-dir: ${{ cloudbees.workspace }}/overlays/dev
-          environment-variables: '{"IMAGE_NAME":"configserver-deployment:3.2.4","PORT":8888}'
+         
           
