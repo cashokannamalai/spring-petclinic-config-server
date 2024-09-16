@@ -34,7 +34,7 @@ jobs:
 
   Deploy:
     needs: Build
-    kind: deploy
+    kind: Deploy
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
@@ -43,10 +43,6 @@ jobs:
         uses: cashokannamalai/kubeconfig@v1
         with:
           secname: ${{ secrets.kubeconfig }}
-
-      - name: List Workspace Directory
-        uses: docker://alpine/git:latest
-        run: ls -la /cloudbees/workspace
 
       - id: k8s-kustomize-deploy
         name: k8s-kustomize-deploy.
