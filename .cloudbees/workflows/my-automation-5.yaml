@@ -6,22 +6,13 @@ on:
     branches:
       - main
 jobs:
-  Checkout:
+  build-deploy:
+    environment: production
     steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-  Build:
-    needs: Checkout
-    steps:
-      - name: Configure git
-        uses: docker://alpine/git:latest
-        run: |
-          git config --global --add safe.directory /cloudbees/workspace
       - name: Checkout
         uses: cloudbees-io/checkout@v1
       - uses: cloudbees-io/cbci-run-job@v2
-        name: Build
-        kind: build
+        name: CBCI Deploy
         with:
           url: https://sda.preview.cb-demos.io/ashok-petclinic/
           username: c_aannamalai
@@ -29,27 +20,15 @@ jobs:
           job-name: spring-petclinic/job/spring-petclinic-config-server
           test-type: Junit
           test-result-location: testReport
-  Deploy:
+  Build22:
+    needs: build-deploy
     environment: production
-    needs: Build
-    kind: Deploy
     steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-      - name: Set kubeconfig
-        uses: cashokannamalai/kubeconfig@v1
+      - uses: cloudbees-io/cbci-run-job@v2
+        name: sampleBuild
+        kind: deploy
         with:
-          secname: ${{ secrets.kubeconfig }}
-
-      - name: Kustomize Deploy
-        id: k8s-kustomize-deploy
-        uses: cloudbees-io/kustomize-deploy@v1
-        with:
-          kustomization-base-dir: ${{ cloudbees.workspace }}/base
-          
-          
-      - name: Track deployment status
-        uses: docker://bitnami/kubectl:latest
-        run: |
-          kubectl rollout status deployment/configserver-deployment --namespace ashok
-  
+          url: https://sda.preview.cb-demos.io/ashok-petclinic
+          username: c_aannamalai
+          token: ${{ secrets.SNAQVI_CI_TOKEN }}
+          job-name: spring-petclinic/job/spring-petclinic-config-server
