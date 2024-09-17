@@ -4,6 +4,5 @@ metadata:
   name: configserver-service
 spec:
   ports:
-    - protocol: TCP
-      port: 80 
+    - port: 8888
       targetPort: 8888
