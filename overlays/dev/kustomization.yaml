@@ -46,7 +46,7 @@ patches:
         name: configserver-ingress
       spec:
         rules:
-          - host: staging.yourdomain.com
+          - host:
             http:
               paths:
                 - path: /config
