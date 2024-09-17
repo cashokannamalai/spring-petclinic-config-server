@@ -1,4 +1,10 @@
 resources:
   - ../../base
-patchesStrategicMerge:
-  - patch.yaml
+
+patches:
+  - path: patch.yaml
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: configserver-deployment
