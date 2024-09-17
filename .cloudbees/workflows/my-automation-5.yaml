@@ -42,10 +42,13 @@ jobs:
           secname: ${{ secrets.kubeconfig }}
 
       - id: k8s-kustomize-deploy
-        name: deploy
+        name: k8s-kustomize-deploy
         uses: cloudbees-io/kustomize-deploy@v1
         with:
           kustomization-base-dir: ${{ cloudbees.workspace }}/base
+          kustomization-overlays-dir: ${{ cloudbees.workspace }}/overlays/dev
+          environment-variables: '{"IMAGE_NAME":"caannamalai/configserver:ashok","PORT":8888}'
+
           
           
       - name: Track deployment status
