@@ -30,6 +30,7 @@ jobs:
           test-type: Junit
           test-result-location: testReport
   Deploy:
+    environment: production
     needs: Build
     kind: Deploy
     steps:
@@ -45,9 +46,6 @@ jobs:
         uses: cloudbees-io/kustomize-deploy@v1
         with:
           kustomization-base-dir: ${{ cloudbees.workspace }}/base
-          kustomization-overlays-dir: ${{ cloudbees.workspace }}/overlays/staging
-          environment-variables: '{"IMAGE_NAME":"caannamalai/configserver:3.2.4","PORT":8888}'
-
           
           
       - name: Track deployment status
