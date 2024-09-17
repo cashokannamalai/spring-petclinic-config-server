@@ -3,4 +3,8 @@ kind: Deployment
 metadata:
   name: configserver-deployment
 spec:
-  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: configserver
+          image: caannamalai/configserver:ashok
