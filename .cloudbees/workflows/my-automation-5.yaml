@@ -12,13 +12,9 @@ jobs:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
 
-      - uses: cashokannamalai/kubeconfig@v1
-        name: Set kubeconfig
-        with:
-          secname: ${{ secrets.kubeconfig }}
 
       - uses: cloudbees-io/kustomize-deploy@v1
         name: deploy
         kind: deploy
         with:
-          kustomization-base-dir: ${{ cloudbees.workspace }}/base
+          kustomization-base-dir: ${{ cloudbees.workspace }}
