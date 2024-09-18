@@ -183,5 +183,5 @@ jobs:
         name: sampletest
         kind: test
         with:
-          test-type: JUNIT
+          test-type: TESTING
           folder-name: testresults/
