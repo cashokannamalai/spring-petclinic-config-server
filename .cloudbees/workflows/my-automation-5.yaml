@@ -36,8 +36,11 @@ jobs:
     environment: production
     needs: Build23
     steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
       - uses: cloudbees-io/kustomize-deploy@v1
         name: deploy
         kind: deploy
         with:
-          kustomization-base-dir: .
+          kustomization-base-dir: /cloudbees/workspace/base
