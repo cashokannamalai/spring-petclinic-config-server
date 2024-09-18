@@ -20,4 +20,3 @@ jobs:
           job-name: spring-petclinic/job/spring-petclinic-config-server
           test-type: Junit
           test-result-location: testReport
-  
