@@ -147,7 +147,8 @@ jobs:
             ## SonarQube Analysis Results
 
             | Severity And Issue Count |
-            |-----------|-------------|
+            |------------------------|
+            
             |  ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }} |
             | ${{ steps.FetchSonarQubeIssues.outputs.CRITICAL_COUNT }} |
             | ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }} |
