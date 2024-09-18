@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-jobs:   
+jobs:
   Build:
     outputs:
       unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}
@@ -16,10 +16,8 @@ jobs:
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
-
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-
       - name: Get Commit Info
         uses: docker://alpine/git:latest
         id: commitinfo
@@ -28,21 +26,16 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-
       - name: RunUnitTest
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
-        run: >
+        run: |
           mvn test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
-
-          cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1
-          > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
-
+          cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1 > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
       - name: Configure container registry credentials
         id: dockerconfig
         uses: cloudbees-io/configure-oci-credentials@v1
@@ -50,14 +43,12 @@ jobs:
           registry: ${{ secrets.STAGING_DOCKER_REGISTRY }}
           username: ${{ secrets.STAGING_DOCKER_USERNAME }}
           password: ${{ secrets.STAGING_DOCKER_PASSWORD }}
-
       - name: Push image to OCI registry
         uses: cloudbees-io/kaniko@v1
         with:
           dockerfile: Dockerfile
           context: .
           destination: ${{ secrets.STAGING_DOCKER_REGISTRY }}/${{ secrets.STAGING_DOCKER_USERNAME }}/configserver:3.2.4
-
       - name: Publish evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
@@ -67,7 +58,6 @@ jobs:
             - **Commit Message:** "${{ steps.commitinfo.outputs.commit_msg }}"
             ## Unit Test Results
             - **Unit Test Results:** "${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}"
-
   StaticAnalysis:
     outputs:
       BLOCKER_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }}
@@ -79,8 +69,7 @@ jobs:
         uses: cloudbees-io/github-security-sast-scan-code@v1
         with:
           token: ${{ secrets.GITHUB_SECRET }}
-          language: "LANGUAGE_JAVA"
-          
+          language: LANGUAGE_JAVA
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
         name: Scan
         kind: scan
@@ -107,39 +96,20 @@ jobs:
       - name: Fetch SonarQube Issues
         id: FetchSonarQubeIssues
         uses: docker://alpine/git:latest
-        run: >
+        run: |
           apk add --no-cache curl jq
-
           curl -u ${{ secrets.username }}:${{ secrets.password }} \
-
-          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR"
-          \
-
+          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR" \
           -o sonar-issues.json
+          BLOCKER_COUNT=$(jq '[.issues[] | select(.severity=="BLOCKER")] | length' sonar-issues.json)
+          CRITICAL_COUNT=$(jq '[.issues[] | select(.severity=="CRITICAL")] | length' sonar-issues.json)
+          MAJOR_COUNT=$(jq '[.issues[] | select(.severity=="MAJOR")] | length' sonar-issues.json)
+          MINOR_COUNT=$(jq '[.issues[] | select(.severity=="MINOR")] | length' sonar-issues.json)
 
-          BLOCKER_COUNT=$(jq '[.issues[] | select(.severity=="BLOCKER")] |
-          length' sonar-issues.json)
-
-          CRITICAL_COUNT=$(jq '[.issues[] | select(.severity=="CRITICAL")] |
-          length' sonar-issues.json)
-
-          MAJOR_COUNT=$(jq '[.issues[] | select(.severity=="MAJOR")] | length'
-          sonar-issues.json)
-
-          MINOR_COUNT=$(jq '[.issues[] | select(.severity=="MINOR")] | length'
-          sonar-issues.json)
-
-
-          echo "BLOCKER_COUNT=${BLOCKER_COUNT}" >>
-          $CLOUDBEES_OUTPUTS/BLOCKER_COUNT
-
-          echo "CRITICAL_COUNT=${CRITICAL_COUNT}" >>
-          $CLOUDBEES_OUTPUTS/CRITICAL_COUNT
-
+          echo "BLOCKER_COUNT=${BLOCKER_COUNT}" >> $CLOUDBEES_OUTPUTS/BLOCKER_COUNT
+          echo "CRITICAL_COUNT=${CRITICAL_COUNT}" >> $CLOUDBEES_OUTPUTS/CRITICAL_COUNT
           echo "MAJOR_COUNT=${MAJOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MAJOR_COUNT
-
           echo "MINOR_COUNT=${MINOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MINOR_COUNT
-
       - name: Publish evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
@@ -148,14 +118,11 @@ jobs:
 
             | Severity And Issue Count |
             |------------------------|
-            
+
             |  ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }} |
             | ${{ steps.FetchSonarQubeIssues.outputs.CRITICAL_COUNT }} |
             | ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }} |
             |  ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }} |
-
-
-          
   ArtifactPublish:
     needs: Build
     steps:
@@ -169,7 +136,7 @@ jobs:
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        run: >
+        run: |
           mvn deploy \
             -DaltDeploymentRepository=nexus::default::https://${NEXUS_USERNAME}:${NEXUS_PASSWORD}@nexus.cb-demos.io/repository/Petclinic/
   Approval:
@@ -190,23 +157,28 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn test
-
   Deploy:
     needs: SmokeTest
     environment: production
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-
       - uses: cashokannamalai/kubeconfig@v1
         name: Set kubeconfig
         with:
           secname: ${{ secrets.kubeconfig }}
-
       - uses: cloudbees-io/kustomize-deploy@v1
         name: deploy
         kind: deploy
         with:
           kustomization-base-dir: ${{ cloudbees.workspace }}/base
- 
-
+  Test:
+    needs: Deploy
+    environment: production
+    steps:
+      - uses: cloudbees-io/publish-test-results@v1
+        name: sampletest
+        kind: test
+        with:
+          test-type: TESTING
+          folder-name: testresults/
