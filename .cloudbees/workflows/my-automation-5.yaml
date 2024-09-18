@@ -32,3 +32,12 @@ jobs:
           username: c_aannamalai
           token: ${{ secrets.SNAQVI_CI_TOKEN }}
           job-name: spring-petclinic/job/spring-petclinic-config-server
+  sample:
+    environment: production
+    needs: Build23
+    steps:
+      - uses: cloudbees-io/kustomize-deploy@v1
+        name: deploy
+        kind: deploy
+        with:
+          kustomization-base-dir: .
