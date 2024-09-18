@@ -6,35 +6,8 @@ on:
     branches:
       - main
 jobs:
-  build-deploy:
-    environment: production
-    steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-      - uses: cloudbees-io/cbci-run-job@v2
-        name: CBCI Deploy
-        with:
-          url: https://sda.preview.cb-demos.io/ashok-petclinic/
-          username: c_aannamalai
-          token: ${{ secrets.SNAQVI_CI_TOKEN }}
-          job-name: spring-petclinic/job/spring-petclinic-config-server
-          test-type: Junit
-          test-result-location: testReport
-  Build23:
-    needs: build-deploy
-    environment: production
-    steps:
-      - uses: cloudbees-io/cbci-run-job@v2
-        name: stpes1
-        kind: deploy
-        with:
-          url: https://sda.preview.cb-demos.io/ashok-petclinic/
-          username: c_aannamalai
-          token: ${{ secrets.SNAQVI_CI_TOKEN }}
-          job-name: spring-petclinic/job/spring-petclinic-config-server
   sample:
     environment: production
-    needs: Build23
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
@@ -43,4 +16,4 @@ jobs:
         name: deploy
         kind: deploy
         with:
-          kustomization-base-dir: /cloudbees/workspace/base
+          kustomization-base-dir: ${{ cloudbees.workspace }}/base
