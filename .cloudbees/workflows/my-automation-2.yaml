@@ -188,43 +188,6 @@ jobs:
         shell: sh
         run: |
           kubectl apply -f /cloudbees/workspace/deployment-service.yaml
-  Evidence:
-    needs:
-      - Deploy
-      - Build
-      - Checkout
-      - StaticAnalysis
-    steps:
-      - uses: cloudbees-io/publish-evidence-item@v1
-        name: Publish evidence
-        with:
-          content: >
-            - Workflow ID: ${{ cloudbees.run_id }}
-
-            - URL: ${{ cloudbees.api.url }}
-
-             ## Commit Information
-            - **Commit ID:** "${{ needs.Checkout.outputs.commit_id }}"
-
-            - **Commit Message:** "${{ needs.Checkout.outputs.commit_msg }}"
-
-            - **Unit Test Results:** "${{ needs.Build.outputs.unitTestResults
-            }}"
-
-
-            ## SonarQube Analysis Results
-
-
-            | Severity And Issue Count |
-
-            |------------------------|
-
-            |  ${{ needs.StaticAnalysis.outputs.BLOCKER_COUNT }} |
-
-            |  ${{ needs.StaticAnalysis.outputs.CRITICAL_COUNT }} |
-
-            |  ${{ needs.StaticAnalysis.outputs.MAJOR_COUNT }} |
-
-            |  ${{ needs.StaticAnalysis.outputs.MINOR_COUNT }} |
+ 
  
 
