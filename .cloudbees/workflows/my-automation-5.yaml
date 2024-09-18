@@ -20,3 +20,15 @@ jobs:
           job-name: spring-petclinic/job/spring-petclinic-config-server
           test-type: Junit
           test-result-location: testReport
+  Build23:
+    needs: build-deploy
+    environment: production
+    steps:
+      - uses: cloudbees-io/cbci-run-job@v2
+        name: stpes1
+        kind: deploy
+        with:
+          url: https://sda.preview.cb-demos.io/ashok-petclinic/
+          username: c_aannamalai
+          token: ${{ secrets.SNAQVI_CI_TOKEN }}
+          job-name: spring-petclinic/job/spring-petclinic-config-server
