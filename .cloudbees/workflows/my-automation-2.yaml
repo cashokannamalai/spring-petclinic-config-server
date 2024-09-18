@@ -146,12 +146,12 @@ jobs:
           content: |
             ## SonarQube Analysis Results
 
-            | Severity  | Issue Count |
+            | Severity And Issue Count |
             |-----------|-------------|
-            | **Blocker**  | ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }} |
-            | **Critical** | ${{ steps.FetchSonarQubeIssues.outputs.CRITICAL_COUNT }} |
-            | **Major**    | ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }} |
-            | **Minor**    | ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }} |
+            |  ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }} |
+            | ${{ steps.FetchSonarQubeIssues.outputs.CRITICAL_COUNT }} |
+            | ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }} |
+            |  ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }} |
 
 
           
