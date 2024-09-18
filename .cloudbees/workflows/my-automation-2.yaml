@@ -5,11 +5,21 @@ on:
   push:
     branches:
       - main
-jobs:
-  Checkout:
+jobs:   
+  Build:
+    outputs:
+      unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}
+      commit_id: ${{ steps.commitinfo.outputs.commit_id }}
+      commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
     steps:
+      - name: Configure git
+        uses: docker://alpine/git:latest
+        run: |
+          git config --global --add safe.directory /cloudbees/workspace
+
       - name: Checkout
         uses: cloudbees-io/checkout@v1
+
       - name: Get Commit Info
         uses: docker://alpine/git:latest
         id: commitinfo
@@ -18,24 +28,12 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-    outputs:
-      commit_id: ${{ steps.commitinfo.outputs.commit_id }}
-      commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
-  Build:
-    needs: Checkout
-    outputs:
-      unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}
-    steps:
-      - name: Configure git
-        uses: docker://alpine/git:latest
-        run: |
-          git config --global --add safe.directory /cloudbees/workspace
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
+
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
+
       - name: RunUnitTest
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
@@ -44,6 +42,7 @@ jobs:
 
           cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1
           > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
+
       - name: Configure container registry credentials
         id: dockerconfig
         uses: cloudbees-io/configure-oci-credentials@v1
@@ -51,13 +50,24 @@ jobs:
           registry: ${{ secrets.STAGING_DOCKER_REGISTRY }}
           username: ${{ secrets.STAGING_DOCKER_USERNAME }}
           password: ${{ secrets.STAGING_DOCKER_PASSWORD }}
+
       - name: Push image to OCI registry
         uses: cloudbees-io/kaniko@v1
         with:
           dockerfile: Dockerfile
           context: .
-          destination: ${{ secrets.STAGING_DOCKER_REGISTRY }}/${{
-            secrets.STAGING_DOCKER_USERNAME }}/configserver:3.2.4
+          destination: ${{ secrets.STAGING_DOCKER_REGISTRY }}/${{ secrets.STAGING_DOCKER_USERNAME }}/configserver:3.2.4
+
+      - name: Publish evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |
+            ## Commit Information
+            - **Commit ID:** "${{ steps.commitinfo.outputs.commit_id }}"
+            - **Commit Message:** "${{ steps.commitinfo.outputs.commit_msg }}"
+            ## Unit Test Results
+            - **Unit Test Results:** "${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}"
+
   StaticAnalysis:
     outputs:
       BLOCKER_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }}
