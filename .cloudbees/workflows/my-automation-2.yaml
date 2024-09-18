@@ -176,9 +176,12 @@ jobs:
     needs: Deploy
     environment: production
     steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
       - uses: cloudbees-io/publish-test-results@v1
         name: sampletest
         kind: test
         with:
-          test-type: TESTING
+          test-type: JUNIT
           folder-name: testresults/
