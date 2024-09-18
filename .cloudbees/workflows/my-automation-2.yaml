@@ -139,6 +139,26 @@ jobs:
           echo "MAJOR_COUNT=${MAJOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MAJOR_COUNT
 
           echo "MINOR_COUNT=${MINOR_COUNT}" >> $CLOUDBEES_OUTPUTS/MINOR_COUNT
+
+      - uses: cloudbees-io/publish-evidence-item@v1
+        name: Publish evidence
+        with:
+          content: >
+            ## SonarQube Analysis Results
+
+
+            | Severity And Issue Count |
+
+            |------------------------|
+
+            |  ${{ steps.StaticAnalysis.outputs.BLOCKER_COUNT }} |
+
+            |  ${{ steps.StaticAnalysis.outputs.CRITICAL_COUNT }} |
+
+            |  ${{ steps.StaticAnalysis.outputs.MAJOR_COUNT }} |
+
+            |  ${{ steps.StaticAnalysis.outputs.MINOR_COUNT }} |
+          
   ArtifactPublish:
     needs: Build
     steps:
