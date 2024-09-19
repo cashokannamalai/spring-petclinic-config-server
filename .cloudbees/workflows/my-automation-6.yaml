@@ -32,5 +32,6 @@ jobs:
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
+        id: Buildinfo
         run: |
           mvn clean install
