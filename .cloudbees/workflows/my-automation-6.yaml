@@ -38,6 +38,9 @@ jobs:
   Build:
     needs: ValidateCommits
     steps:
+      - name: Checkout Repository
+        id: Checkout
+        uses: cloudbees-io/checkout@v1
       - name: Build
         id: Buildinfo
         uses: docker://maven:3-eclipse-temurin-17
