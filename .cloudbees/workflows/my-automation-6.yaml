@@ -19,20 +19,13 @@ jobs:
         id: Checkout
         uses: cloudbees-io/checkout@v1
 
-      - name: Show commit message (Debug)
-        id: show-commit
-        uses: docker://alpine/git:latest
-        run: |
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-          echo "Commit message: $COMMIT_MESSAGE"
-
-      - name: Validate commit message
+      - name: Validate commit message for JIRA issue key
         id: validate-commit
         uses: docker://alpine/git:latest
         run: |
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           if ! echo "$COMMIT_MESSAGE" | grep -E '(CBDEMO-[0-9]+)'; then
-            echo "Commit message does not contain a valid CBDEMO-123. Aborting."
+            echo "Commit message does not contain a valid CBDEMO issue key. Aborting."
             exit 1
           else
             echo "Commit message contains a valid CBDEMO issue key."
