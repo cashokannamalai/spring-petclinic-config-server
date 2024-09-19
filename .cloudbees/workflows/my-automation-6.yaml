@@ -30,7 +30,7 @@ jobs:
 
 
   Build:
-    needs: CheckoutAndValidate
+    needs: ValidateCommits
     steps:
       - name: Build
         id: Buildinfo
