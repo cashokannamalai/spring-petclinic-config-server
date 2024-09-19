@@ -17,20 +17,23 @@ jobs:
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
-      - name:  git
-        id: info1
-        uses: docker://alpine/git:latest
-        run: |
-          git fetch --depth=2
 
+          # Fetch more commits if needed
+          git fetch --depth=10
+
+          # Check if there is a previous commit to compare
           if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
-            git log --pretty=format:"%s" HEAD..HEAD~1 > commit_messages.txt
+            git log --pretty=format:"%s" HEAD~1..HEAD > commit_messages.txt
+            echo "Comparing commit messages:"
+            cat commit_messages.txt
           else
-            echo "No previous commit found to compare" && exit 1
+            echo "No previous commit found to compare. Skipping commit message validation." > commit_messages.txt
+            # Optionally, exit with a status that indicates success if you want to skip validation for initial commits
+            exit 0
           fi
 
+          # Validate commit message
           grep -Eo 'CBDEMO-135' commit_messages.txt || (echo "Jira issue key missing in commit message" && exit 1)
-
 
   Build:
     needs: ValidateCommits
