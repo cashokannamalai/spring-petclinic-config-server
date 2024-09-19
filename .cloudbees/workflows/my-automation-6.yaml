@@ -2,13 +2,12 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
-  pull_request:
+  push:
     branches:
-      - ashok
       - main
 jobs:
   Build:
-    
+
     steps:
       - name: Configure git
         id: info
@@ -16,10 +15,21 @@ jobs:
         run: |
           git config --global --add safe.directory /cloudbees/workspace
 
-
       - name: Checkout
-        id: Buil
+        id: Checkout
         uses: cloudbees-io/checkout@v1
+
+      - name: Validate commit message
+        id: validate-commit
+        uses: docker://alpine/git:latest
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          if ! echo "$COMMIT_MESSAGE" | grep -E '(CBDEMO-[0-9]+)'; then
+            echo "Commit message does not contain a valid JIRA issue key (CBDEMO-123). Aborting."
+            exit 1
+          else
+            echo "Commit message contains a valid JIRA issue key."
+          fi
 
       - name: Build
         id: Buildinfo
