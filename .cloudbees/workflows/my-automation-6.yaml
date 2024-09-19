@@ -5,6 +5,10 @@ on:
   pull_request:
     branches:
       - ashok
+      - ashok
+
+      - main
+        main
 jobs:
   Build:
     outputs:
@@ -30,4 +34,5 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-          
+ ashok
+ main
