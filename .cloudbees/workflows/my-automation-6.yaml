@@ -14,19 +14,11 @@ jobs:
         run: |
           git config --global --add safe.directory /cloudbees/workspace
 
-      - name: Fetch Commit Messages
-        id: fetch-commits
-        uses: docker://alpine/git:latest
-        run: |
-          cd /cloudbees/workspace  # Ensure we are in the repository directory
+  
           git fetch --depth=2
           git log --pretty=format:"%s" HEAD..HEAD~1 > commit_messages.txt
 
-      - name: Validate Jira Issue Keys
-        id: validate-jira
-        uses: docker://alpine/git:latest
-        run: |
-          cd /cloudbees/workspace  # Ensure we are in the repository directory
+   
           grep -Eo 'CBDEMO-135' commit_messages.txt || (echo "Jira issue key missing in commit message" && exit 1)
 
   Build:
