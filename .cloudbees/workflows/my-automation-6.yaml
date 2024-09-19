@@ -18,10 +18,16 @@ jobs:
     steps:
       - name: Configure git
         uses: docker://alpine/git:latest
+        id: info
         run: |
           git config --global --add safe.directory /cloudbees/workspace
+
+
       - name: Checkout
         uses: cloudbees-io/checkout@v1
+        id: Buil
+
+
       - name: Get Commit Info
         uses: docker://alpine/git:latest
         id: commitinfo
@@ -30,6 +36,8 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
+
+
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         id: Buildinfo
