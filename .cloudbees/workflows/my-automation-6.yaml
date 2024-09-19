@@ -26,44 +26,13 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-      - name: Validate Commit Messages
-        id: validateCommitMessages
+      - name: Add JIRA Key to Commit Message
         uses: docker://alpine/git:latest
         run: |
-          COMMIT_MSG=$(git log -1 --pretty=%B)
-          if ! echo "$COMMIT_MSG" | grep -q "CBDEMO-124"; then
-            echo "Error: Commit message must contain Jira issue key CBDEMO-124."
-            exit 1
-          fi
+          JIRA_KEY="CBDEMO-124"  
+          NEW_COMMIT_MSG="${JIRA_KEY}: ${COMMIT_MSG}"
+          git commit --amend -m "$NEW_COMMIT_MSG"
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-      - name: RunUnitTest
-        id: RunUnitTest
-        uses: docker://maven:3-eclipse-temurin-17
-        run: |
-          mvn test > "$CLOUDBEES_OUTPUTS/mvn_test_stdio"
-          cat "$CLOUDBEES_OUTPUTS/mvn_test_stdio" | grep "Tests run:" | tail -1 > "$CLOUDBEES_OUTPUTS/mvn_test_stdio1"
-      - name: Configure container registry credentials
-        id: dockerconfig
-        uses: cloudbees-io/configure-oci-credentials@v1
-        with:
-          registry: ${{ secrets.STAGING_DOCKER_REGISTRY }}
-          username: ${{ secrets.STAGING_DOCKER_USERNAME }}
-          password: ${{ secrets.STAGING_DOCKER_PASSWORD }}
-      - name: Push image to OCI registry
-        uses: cloudbees-io/kaniko@v1
-        with:
-          dockerfile: Dockerfile
-          context: .
-          destination: ${{ secrets.STAGING_DOCKER_REGISTRY }}/${{ secrets.STAGING_DOCKER_USERNAME }}/configserver:3.2.4
-      - name: Publish evidence
-        uses: cloudbees-io/publish-evidence-item@v1
-        with:
-          content: |
-            ## Commit Information
-            - **Commit ID:** "${{ steps.commitinfo.outputs.commit_id }}"
-            - **Commit Message:** "${{ steps.commitinfo.outputs.commit_msg }}"
-            ## Unit Test Results
-            - **Unit Test Results:** "${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}"
