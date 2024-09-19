@@ -7,17 +7,15 @@ on:
       - main
 jobs:
   Build:
-    outputs:
-      unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}
-      commit_id: ${{ steps.commitinfo.outputs.commit_id }}
-      commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
     steps:
       - name: Configure git
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
+
       - name: Checkout
         uses: cloudbees-io/checkout@v1
+
       - name: Get Commit Info
         uses: docker://alpine/git:latest
         id: commitinfo
@@ -26,17 +24,17 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-      - name: Verify Jira Issue Key
-        id: verify_jira_key
+
+      - name: Validate Commit Message
+        id: validate_commit
         uses: docker://alpine/git:latest
         run: |
-          # Define the Jira issue key regex to match 'CBDEMO-122'
-          JIRA_REGEX="CBDEMO-[0-9]+"
-          
-          if [[ ! ${COMMIT_MSG} =~ ${JIRA_REGEX} ]]; then
-            echo "Error: Commit message does not contain a Jira issue key (e.g., CBDEMO-122)."
+          COMMIT_MSG=$(cat $CLOUDBEES_OUTPUTS/commit_msg)
+          if ! echo "$COMMIT_MSG" | grep -qE 'CBDEMO-[0-9]+'; then
+            echo "Commit message does not contain a valid JIRA issue key (e.g., CBDEMO-122)."
             exit 1
           fi
+
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
