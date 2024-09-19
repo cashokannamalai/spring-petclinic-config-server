@@ -18,7 +18,7 @@ jobs:
         run: |
           git config --global --add safe.directory /cloudbees/workspace
       - name:  git
-        id: info
+        id: info1
         uses: docker://alpine/git:latest
         run: |
           git fetch --depth=2
