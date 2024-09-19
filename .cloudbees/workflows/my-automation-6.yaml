@@ -8,23 +8,18 @@ on:
 jobs:
   ValidateCommits:
     steps:
+      - name: Checkout
+        id: Checkout
+        uses: cloudbees-io/checkout@v1
+
       - name: Configure git
         id: info
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
-
-      - name: Fetch Commit Messages
-        id: fetch-commits
-        uses: docker://alpine/git:latest
-        run: |
           git fetch --depth=2 
           git log --pretty=format:"%s" HEAD..HEAD~1 > commit_messages.txt
 
-      - name: Validate Jira Issue Keys
-        id: validate-jira
-        uses: docker://alpine/git:latest
-        run: |
           grep -Eo 'CBDEMO-135' commit_messages.txt || (echo "Jira issue key missing in commit message" && exit 1)
         
 
