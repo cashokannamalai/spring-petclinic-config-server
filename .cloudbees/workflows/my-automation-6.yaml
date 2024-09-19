@@ -25,7 +25,7 @@ jobs:
         id: commit_changes
         uses: docker://alpine/git:latest
         run: |
-          JIRA_KEY="CBDEMO-152"
+          JIRA_KEY="CBDEMO-122"
           git add .
           git commit -m "$JIRA_KEY: Commit message describing changes"
           git push origin main
