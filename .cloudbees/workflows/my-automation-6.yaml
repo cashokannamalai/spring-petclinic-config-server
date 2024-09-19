@@ -6,44 +6,36 @@ on:
     branches:
       - main
 jobs:
-  ValidateCommits:
+  Build:
+    outputs:
+      unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}
+      commit_id: ${{ steps.commitinfo.outputs.commit_id }}
+      commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
     steps:
-      - name: Checkout Repository
-        id: Checkout
-        uses: cloudbees-io/checkout@v1
-
       - name: Configure git
-        id: info
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
-
-          # Fetch more commits if needed
-          git fetch --depth=10
-
-          # Check if there is a previous commit to compare
-          if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
-            git log --pretty=format:"%s" HEAD~1..HEAD > commit_messages.txt
-            echo "Comparing commit messages:"
-            cat commit_messages.txt
-          else
-            echo "No previous commit found to compare. Skipping commit message validation." > commit_messages.txt
-            # Optionally, exit with a status that indicates success if you want to skip validation for initial commits
-            exit 0
-          fi
-
-          # Validate commit message
-          grep -Eo 'CBDEMO-135' commit_messages.txt || (echo "Jira issue key missing in commit message" && exit 1)
-
-  Build:
-    needs: ValidateCommits
-    steps:
-      - name: Checkout Repository
-        id: Checkout
+      - name: Checkout
         uses: cloudbees-io/checkout@v1
+      - name: Get Commit Info
+        uses: docker://alpine/git:latest
+        id: commitinfo
+        run: |
+          COMMIT_ID=$(git rev-parse HEAD)
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
+          echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
+      - name: Validate Commit Message
+        
+        id: validate_commit
+        uses: docker://alpine/git:latest
+        run: |
+          if ! echo "${COMMIT_MSG}" | grep -q "JIRA-[0-9]\+"; then
+            echo "Error: Commit message does not contain a Jira issue key."
+            exit 1
+          fi
       - name: Build
-        id: Buildinfo
         uses: docker://maven:3-eclipse-temurin-17
         run: |
-          cd /cloudbees/workspace  # Ensure we are in the repository directory
           mvn clean install
