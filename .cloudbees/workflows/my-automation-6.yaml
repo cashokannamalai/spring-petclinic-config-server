@@ -13,14 +13,10 @@ jobs:
       commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
     steps:
       - name: Configure git
-        id: config
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
-          git config --global user.email "c_aannamalai@cloudbees.com"
-          git config --global user.name "cashokannamalai"
       - name: Checkout
-        id: configbuild
         uses: cloudbees-io/checkout@v1
       - name: Get Commit Info
         uses: docker://alpine/git:latest
@@ -30,15 +26,18 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-      - name: Add JIRA Key to Commit Message
-        id: add
+      - name: Verify Jira Issue Key
+        id: verify_jira_key
         uses: docker://alpine/git:latest
         run: |
-          JIRA_KEY="CBDEMO-124"  
-          NEW_COMMIT_MSG="${JIRA_KEY}: ${COMMIT_MSG}"
-          git commit --amend -m "$NEW_COMMIT_MSG"
+          # Define the Jira issue key regex to match 'CBDEMO-122'
+          JIRA_REGEX="CBDEMO-[0-9]+"
+          
+          if [[ ! ${COMMIT_MSG} =~ ${JIRA_REGEX} ]]; then
+            echo "Error: Commit message does not contain a Jira issue key (e.g., CBDEMO-122)."
+            exit 1
+          fi
       - name: Build
-        id: build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
