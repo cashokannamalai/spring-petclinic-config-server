@@ -28,7 +28,7 @@ jobs:
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
       - name: Validate Commit Messages
         id: validateCommitMessages
-        uses: docker://alpine:latest
+        uses: docker://alpine/git:latest
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B)
           if ! echo "$COMMIT_MSG" | grep -q "CBDEMO-124"; then
