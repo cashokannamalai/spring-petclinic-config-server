@@ -34,3 +34,4 @@ jobs:
           git add .
           git commit -m "$JIRA_KEY: Commit message describing changes"
           git push origin main
+
