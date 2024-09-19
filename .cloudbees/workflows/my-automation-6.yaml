@@ -25,7 +25,7 @@ jobs:
         run: |
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           if ! echo "$COMMIT_MESSAGE" | grep -E '(CBDEMO-[0-9]+)'; then
-            echo "Commit message does not contain a valid JIRA issue key (CBDEMO-123). Aborting."
+            echo "Commit message does not contain a valid CBDEMO-123. Aborting."
             exit 1
           else
             echo "Commit message contains a valid JIRA issue key."
