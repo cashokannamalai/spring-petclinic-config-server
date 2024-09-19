@@ -32,7 +32,7 @@ jobs:
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B)
           if ! echo "$COMMIT_MSG" | grep -q "CBDEMO-124"; then
-            echo "Error: Commit message does not contain Jira issue key CBDEMO-124."
+            echo "Error: Commit message must contain Jira issue key CBDEMO-124."
             exit 1
           fi
       - name: Build
