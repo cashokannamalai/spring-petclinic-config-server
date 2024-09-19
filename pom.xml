@@ -15,6 +15,13 @@
         <docker.image.dockerfile.dir>${basedir}/../docker</docker.image.dockerfile.dir>
         <spring-cloud.version>2022.0.3</spring-cloud.version>
         <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
+        <sonar.projectKey>spring-petclinic-config-server</sonar.projectKey>
+    <sonar.projectName>spring-petclinic-config-server</sonar.projectName>
+    <sonar.projectVersion>1.0</sonar.projectVersion>
+    <sonar.sources>src/main/java</sonar.sources>
+    <sonar.tests>src/test/java</sonar.tests>
+    <sonar.host.url>https://sonarqube.cb-demos.io/</sonar.host.url>
+    <sonar.login>${env.SONAR_TOKEN}</sonar.login>
     </properties>
 
     <dependencyManagement>
@@ -62,6 +69,19 @@
             <artifactId>spring-context-support</artifactId>
             <version>6.0.10</version>
         </dependency>
+
+         <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-security</artifactId>
+        <version>3.3.3</version>
+    </dependency>
+
+    <!-- Optionally, if you're using Spring Web -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+        <version>3.3.3</version>
+    </dependency>
 
         <!-- Third-party libraries -->
         <dependency>
@@ -119,6 +139,7 @@
                     <target>17</target>
                 </configuration>
             </plugin>
+    
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -143,6 +164,36 @@
                 </includes>
             </configuration>
         </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.3.0.603</version>
+            </plugin>
+        <plugin>
+            <groupId>org.cyclonedx</groupId>
+            <artifactId>cyclonedx-maven-plugin</artifactId>
+            <version>2.7.8</version> <!-- Use the latest stable version -->
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>makeBom</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <includeConfigs>
+                    <includeConfig>runtimeClasspath</includeConfig>
+                </includeConfigs>
+                <projectType>application</projectType>
+                <schemaVersion>1.5</schemaVersion>
+                <destination>${project.build.directory}/reports</destination>
+                <outputName>bom</outputName>
+                <outputFormat>xml</outputFormat>
+                <includeBomSerialNumber>false</includeBomSerialNumber>
+                <includeLicenseText>false</includeLicenseText>
+                <componentVersion>2.0.0</componentVersion>
+            </configuration>
+        </plugin>
         </plugins>
     </build>
 
@@ -160,3 +211,5 @@
         </profile>
     </profiles>
 </project>
+
+
