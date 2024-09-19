@@ -31,7 +31,7 @@ jobs:
         id: validate_commit
         uses: docker://alpine/git:latest
         run: |
-          if ! echo "${COMMIT_MSG}" | grep -q "JIRA-[0-9]\+"; then
+          if ! echo "${COMMIT_MSG}" | grep -q "CBDEMO-124"; then
             echo "Error: Commit message does not contain a Jira issue key."
             exit 1
           fi
