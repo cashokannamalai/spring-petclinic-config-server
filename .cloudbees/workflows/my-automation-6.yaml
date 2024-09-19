@@ -25,10 +25,7 @@ jobs:
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
 
-      - name: Validate Commit Message
-        id: validate_commit
-        uses: docker://alpine/git:latest
-        run: |
+      
           COMMIT_MSG=$(cat $CLOUDBEES_OUTPUTS/commit_msg)
           if ! echo "$COMMIT_MSG" | grep -qE 'CBDEMO-[0-9]+'; then
             echo "Commit message does not contain a valid JIRA issue key (e.g., CBDEMO-122)."
