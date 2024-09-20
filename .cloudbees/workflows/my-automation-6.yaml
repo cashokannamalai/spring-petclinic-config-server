@@ -21,7 +21,6 @@ jobs:
       - uses: cloudbees-io/gosec-sast-scan-code@v1
         name: test
         kind: scan
-        with:
-          language: LANGUAGE_JAVA
+        
     needs:
       - build-test
