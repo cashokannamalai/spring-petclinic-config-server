@@ -16,11 +16,10 @@ jobs:
         run: |
           mvn clean install
 
-  sacn1:
-    steps:
-      - uses: cloudbees-io/gosec-sast-scan-code@v1
-        name: test
-        kind: scan
-        
-    needs:
-      - build-test
+ 
+      - name: Scan with SonarQube bundled
+        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
+        with:
+          sonar-exclusion: src/main/java
+          cover-file-name: ./pom.xml
+          language: LANGUAGE_JAVA
