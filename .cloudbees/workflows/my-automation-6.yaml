@@ -4,8 +4,9 @@ name: My automation
 on:
   pull_request:
     branches:
-      - ashok
+      
       - main
+      - ashok
   workflow_dispatch:
 jobs:
   build-test:
