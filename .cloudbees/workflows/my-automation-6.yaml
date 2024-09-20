@@ -30,6 +30,20 @@ jobs:
           sonar-exclusion: src/main/java
           cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
+
+      - name: Scan with SonarQube bundled
+        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
+        with:
+          sonar-exclusion: src/main/java
+          cover-file-name: ./pom.xml
+          language: LANGUAGE_JAVA
+          threshold-critical: 0
+          threshold-very-high: 0
+          threshold-high: 0
+          threshold-medium: 0
+          threshold-low: 0
+
+
       - name: Publish test results
         uses: cloudbees-io/publish-test-results@v1
         with:
