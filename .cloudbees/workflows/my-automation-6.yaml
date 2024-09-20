@@ -29,6 +29,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
+
+
+
       - name: SonarQube Scan
         id: sonar
         uses: docker://maven:3-eclipse-temurin-17
@@ -41,3 +44,4 @@ jobs:
             -Dsonar.host.url= https://sonarqube.cb-demos.io \
             -Dsonar.login=token: ${{ secrets.token }}
             
+
