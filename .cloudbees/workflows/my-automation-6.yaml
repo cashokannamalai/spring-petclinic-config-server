@@ -2,7 +2,10 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - ashok
+      - main
 jobs:
   Build:
     steps:
@@ -21,7 +24,6 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-
       - name: Scan with GitHub Advanced Security
         uses: cloudbees-io/github-security-sast-scan-code@v1
         with:
@@ -35,6 +37,3 @@ jobs:
           git add .
           git commit -m "$JIRA_KEY: Commit message describing changes"
           git push origin main
-
-
-     
