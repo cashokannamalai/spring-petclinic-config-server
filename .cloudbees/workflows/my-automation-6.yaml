@@ -1,21 +1,40 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My Automation
-environment: ashok
+
 on:
- 
   pull_request:
     branches:
       - ashok
       - main
+
 jobs:
   CheckCommitMessage:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
+
   Build:
     needs: CheckCommitMessage
     steps:
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: mvn clean install
+
+  Approval:
+    needs: Build
+    type: manual-approval
+    environment: ashok
+    steps:
+      - name: Approval
+        uses: docker://maven:3-eclipse-temurin-17
+        run: |
+          echo "Please approve or reject this pull request."
+
+  Finalize:
+    needs: Approval
+    steps:
+      - name: Final Step
+        uses: docker://maven:3-eclipse-temurin-17
+        run: |
+          echo "The pull request has been approved or rejected."
