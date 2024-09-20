@@ -10,17 +10,18 @@ jobs:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-      
       - uses: docker://maven:3-eclipse-temurin-17
         name: Maven Build
         shell: sh
         run: |
           mvn clean install
 
-      - name: Scan with SonarQube bundled
-        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
+  sacn1:
+    steps:
+      - uses: cloudbees-io/gosec-sast-scan-code@v1
+        name: test
+        kind: scan
         with:
-          sonar-exclusion: sonar/*
-          cover-file-name: ./coverage.xml
-          language: LANGUAGE_JAVA
-          sonar.java.binaries: target/classes  
+          language: JAVA
+    needs:
+      - build-test
