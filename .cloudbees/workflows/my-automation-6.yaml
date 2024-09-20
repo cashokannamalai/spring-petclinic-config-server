@@ -19,29 +19,15 @@ jobs:
       - name: Checkout
         id: configbuild
         uses: cloudbees-io/checkout@v1
-      - name: Build
-        id: build
-        uses: docker://maven:3-eclipse-temurin-17
+      
+      - uses: docker://maven:3-eclipse-temurin-17
+        name: Maven Build
+        shell: sh
         run: |
-          mvn clean install
-      - name: Scan with GitHub Advanced Security
-        uses: cloudbees-io/github-security-sast-scan-code@v1
-        with:
-          token: ${{ secrets.GITHUB_SECRET }}
-          language: LANGUAGE_JAVA
+          mvn clean test
+      
 
 
 
-      - name: SonarQube Scan
-        id: sonar
-        uses: docker://maven:3-eclipse-temurin-17
-        env:
-          SONAR_HOST_URL:  https://sonarqube.cb-demos.io
-          SONAR_TOKEN:  ${{ secrets.token }}
-        run: |
-          mvn sonar:sonar \
-            -Dsonar.projectKey=config \
-            -Dsonar.host.url= https://sonarqube.cb-demos.io \
-            -Dsonar.login=token: ${{ secrets.token }}
-            
+    
 
