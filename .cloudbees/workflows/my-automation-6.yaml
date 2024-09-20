@@ -2,8 +2,9 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
-  workflow_dispatch:
-
+  push:
+    branches:
+      - main
 jobs:
   Build:
     outputs:
@@ -17,23 +18,18 @@ jobs:
           git config --global user.email "c_aannamalai@cloudbees.com"
           git config --global user.name "cashokannamalai"
           git config --global --add safe.directory /cloudbees/workspace
-
       - name: Checkout code
         uses: cloudbees-io/checkout@v1
-
       - name: Commit changes with JIRA key
         id: commit_changes
         uses: docker://alpine/git:latest
         run: |
           JIRA_KEY="CBDEMO-152"
           git add .
-          # Check if there are any changes before committing
-          if [ -n "$(git status --porcelain)" ]; then
-            git commit -m "$JIRA_KEY: Commit message describing changes"
-            git push origin main
-          else
-            echo "No changes to commit."
-      
+          git commit -m "$JIRA_KEY: Commit message describing changes"
+          git push origin main
+
+
       - name: Get Commit Info
         uses: docker://alpine/git:latest
         id: commitinfo
@@ -42,15 +38,10 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-
       - name: Build Project
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-
-  
-    
-
   StaticAnalysis:
     outputs:
       BLOCKER_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }}
@@ -116,9 +107,6 @@ jobs:
             | ${{ steps.FetchSonarQubeIssues.outputs.CRITICAL_COUNT }} |
             | ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }} |
             |  ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }} |
-
-            
-
   ArtifactPublish:
     needs: Build
     steps:
@@ -128,22 +116,19 @@ jobs:
           git config --global user.email "c_aannamalai@cloudbees.com"
           git config --global user.name "cashokannamalai"
           git config --global --add safe.directory /cloudbees/workspace
-
       - name: Checkout code
         uses: cloudbees-io/checkout@v1
 
+        
       - name: Commit changes with JIRA key
         id: commit_changes
         uses: docker://alpine/git:latest
         run: |
           JIRA_KEY="CBDEMO-152"
           git add .
-          # Check if there are any changes before committing
-          if [ -n "$(git status --porcelain)" ]; then
-            git commit -m "$JIRA_KEY: Commit message describing changes"
-            git push origin main
-          else
-            echo "No changes to commit."
+          git commit -m "$JIRA_KEY: Commit message describing changes"
+          git push origin main
+
 
       - name: Publish Artifact to Nexus
         uses: docker://maven:3-eclipse-temurin-17
