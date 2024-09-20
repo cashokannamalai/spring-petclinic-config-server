@@ -2,7 +2,7 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
-  push:
+  pull_request:
     branches:
       - main
 jobs:
@@ -15,27 +15,3 @@ jobs:
         shell: sh
         run: |
           mvn clean install
-      - name: Scan with GitHub Advanced Security
-        uses: cloudbees-io/github-security-sast-scan-code@v1
-        with:
-          token: ${{ secrets.GITHUB_SECRET }}
-          language: LANGUAGE_JAVA
-      - name: Scan with Find Security Bugs
-        uses: cloudbees-io/findsecbugs-sast-scan-code@v1
-        with:
-          language: LANGUAGE_JAVA
-      - name: Scan with SonarQube bundled
-        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
-        with:
-          sonar-exclusion: src/main/java
-          cover-file-name: ./pom.xml
-          language: LANGUAGE_JAVA
-
-
-
-
-      - name: Publish test results
-        uses: cloudbees-io/publish-test-results@v1
-        with:
-          test-type: JUnit
-          folder-name: src/main/java
