@@ -29,3 +29,12 @@ jobs:
           git add .
           git commit -m "$JIRA_KEY: Commit message describing changes"
           git push origin main
+
+  StaticAnalysis:
+    needs: Build
+    steps:
+      - name: Scan with GitHub Advanced Security
+        uses: cloudbees-io/github-security-sast-scan-code@v1
+        with:
+          token: ${{ secrets.GITHUB_SECRET }}
+          language: LANGUAGE_JAVA
