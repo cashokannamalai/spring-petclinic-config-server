@@ -2,9 +2,9 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
-  pull_request:
+ 
+  push:
     branches:
-      - ashok
       - main
 jobs:
   Build:
@@ -29,4 +29,19 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
+
+
+
+      - name: SonarQube Scan
+        id: sonar
+        uses: docker://maven:3-eclipse-temurin-17
+        env:
+          SONAR_HOST_URL:  https://sonarqube.cb-demos.io
+          SONAR_TOKEN:  ${{ secrets.token }}
+        run: |
+          mvn sonar:sonar \
+            -Dsonar.projectKey=config \
+            -Dsonar.host.url= https://sonarqube.cb-demos.io \
+            -Dsonar.login=token: ${{ secrets.token }}
+            
 
