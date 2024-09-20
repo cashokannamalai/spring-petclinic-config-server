@@ -29,12 +29,3 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
-      - name: Commit changes with JIRA key
-        id: commit_changes
-        uses: docker://alpine/git:latest
-        run: |
-          JIRA_KEY="CBDEMO-152"
-          git add .
-          git commit -m "$JIRA_KEY: Commit message describing changes"
-          git push origin main
-
