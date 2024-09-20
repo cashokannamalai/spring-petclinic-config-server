@@ -1,29 +1,21 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My Automation
+environment: ashok
 on:
-  push:
+ 
+  pull_request:
     branches:
+      - ashok
       - main
 jobs:
   CheckCommitMessage:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-      - name: Validate Commit Message
-        uses: docker://alpine/git:latest
-        id: validate_commit
-        run: |
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-          if ! [[ "$COMMIT_MESSAGE" =~ ^\[CBDEMO-[0-9]+\]\ .+ ]]; then
-            echo "Error: Commit message must include a Jira issue key in the format [CBDEMO-152] Short description."
-            exit 1
-          fi
-
   Build:
     needs: CheckCommitMessage
     steps:
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: mvn clean install
-    
