@@ -2,19 +2,44 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
-  workflow_dispatch:
   pull_request:
     branches:
       - main
-      - ashok
-  
 jobs:
   build-test:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
+
+      # Step to get the PR commits and log them
+      - name: Get PR Commits
+        uses: docker://alpine/git:latest
+        shell: sh
+        run: |
+          echo "Fetching all commits linked to this PR..."
+          git log --oneline HEAD..origin/main
+
+      # Step to perform Maven build
       - uses: docker://maven:3-eclipse-temurin-17
         name: Maven Build
         shell: sh
         run: |
           mvn clean install
+
+      # Step to check the PR status over time
+      - name: Track PR Status
+        uses: docker://alpine/git:latest
+        shell: sh
+        run: |
+          echo "Fetching PR statuses..."
+          gh pr status
+
+      # Additional step to log PR status over time (optionally using GitHub CLI)
+      - name: Log PR Status over Time
+        uses: docker://alpine/git:latest
+        shell: sh
+        run: |
+          while true; do
+            gh pr status >> pr-status-log.txt
+            sleep 60  
+          done
