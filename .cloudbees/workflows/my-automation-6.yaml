@@ -2,9 +2,11 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
+  
 jobs:
   build-test:
     steps:
