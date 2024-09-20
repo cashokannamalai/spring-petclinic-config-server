@@ -40,3 +40,4 @@ jobs:
             -Dsonar.projectKey=config \
             -Dsonar.host.url= https://sonarqube.cb-demos.io \
             -Dsonar.login=token: ${{ secrets.token }}
+            
