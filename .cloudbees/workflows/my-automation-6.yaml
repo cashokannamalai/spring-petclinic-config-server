@@ -18,6 +18,13 @@ jobs:
         shell: sh
         run: |
           mvn clean test
+
+      - name: Scan with SonarQube bundled
+        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
+        with:
+          sonar-exclusion: sonar/*
+          cover-file-name: ./coverage.xml
+          language: LANGUAGE_JAVA
       
 
 
