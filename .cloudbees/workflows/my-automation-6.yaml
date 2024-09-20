@@ -22,6 +22,6 @@ jobs:
         name: test
         kind: scan
         with:
-          language: JAVA
+          language: LANGUAGE_JAVA
     needs:
       - build-test
