@@ -2,14 +2,12 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
- 
   push:
     branches:
       - main
 jobs:
   build-test:
     steps:
-     
       - name: Checkout
         uses: cloudbees-io/checkout@v1
       
@@ -17,7 +15,7 @@ jobs:
         name: Maven Build
         shell: sh
         run: |
-          mvn clean test
+          mvn clean install
 
       - name: Scan with SonarQube bundled
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
@@ -25,9 +23,4 @@ jobs:
           sonar-exclusion: sonar/*
           cover-file-name: ./coverage.xml
           language: LANGUAGE_JAVA
-      
-
-
-
-    
-
+          sonar.java.binaries: target/classes  
