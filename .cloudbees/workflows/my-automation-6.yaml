@@ -10,6 +10,9 @@ jobs:
   CheckCommitMessage:
   
     steps:
+      - name: Checkout Code
+        uses: cloudbees-io/checkout@v1
+        
       - name: Check Commit Message
         uses: docker://alpine/git:latest
         run: |
