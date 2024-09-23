@@ -1,37 +1,45 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-name: My Automation
+name: Jira-Enforced Workflow
 on:
   push:
     branches:
       - main
+
 jobs:
   CheckCommitMessage:
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: cloudbees-io/checkout@v1
-      - name: Check for Jira issue key in commit message
+
+      - name: Check Jira Issue Key in Commit Message
         uses: docker://alpine/git:latest
         run: |
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMIT_MESSAGE"
           if ! echo "$COMMIT_MESSAGE" | grep -E '[A-Z]{2,}-[0-9]+'; then
             echo "Error: Commit message must include a Jira issue key (e.g., PROJECT-123)."
             exit 1
           fi
+        shell: sh
 
   Build:
     needs: CheckCommitMessage
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: cloudbees-io/checkout@v1
-      - name: Build
+
+      - name: Build with Maven
         uses: docker://maven:3-eclipse-temurin-17
         run: mvn clean install
-      - name: Scan with SonarQube bundled
+        shell: sh
+
+  SonarQubeScan:
+    needs: Build
+    steps:
+      - name: SonarQube Scan
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
         with:
-          sonar-exclusion: src/main/java
-          cover-file-name: ./pom.xml
-          language: LANGUAGE_JAVA
-
-          
+          sonar-exclusion: "src/main/java/**"
+          cover-file-name: "./pom.xml"
+          language: "LANGUAGE_JAVA"
