@@ -7,23 +7,9 @@ on:
       - main
 
 jobs:
-  CheckCommitMessage:
   
-    steps:
-      - name: Checkout Code
-        uses: cloudbees-io/checkout@v1
-        
-      - name: Check Commit Message
-        uses: docker://alpine/git:latest
-        run: |
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-          if ! [[ "$COMMIT_MESSAGE" =~ ^CBDEMO-[0-9]+ ]]; then
-            echo "Commit message must include a valid Jira issue key (e.g., CBDEMO-122)."
-            exit 1
-          fi
 
   Build:
-    needs: CheckCommitMessage
     steps:
       - name: Checkout Code
         uses: cloudbees-io/checkout@v1
@@ -44,3 +30,18 @@ jobs:
           sonar-exclusion: "src/main/java/**"
           cover-file-name: "./pom.xml"
           language: "LANGUAGE_JAVA"
+
+  CheckCommitMessage:
+    needs:   SonarQubeScan
+    steps:
+      - name: Checkout Code
+        uses: cloudbees-io/checkout@v1
+        
+      - name: Check Commit Message
+        uses: docker://alpine/git:latest
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          if ! [[ "$COMMIT_MESSAGE" =~ ^CBDEMO-[0-9]+ ]]; then
+            echo "Commit message must include a valid Jira issue key (e.g., CBDEMO-122)."
+            exit 1
+          fi
