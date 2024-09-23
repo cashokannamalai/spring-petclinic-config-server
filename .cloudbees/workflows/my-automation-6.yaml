@@ -31,8 +31,8 @@ jobs:
       - name: SonarQube Scan
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
         with:
-          sonar-exclusion: "src/main/java/**"
-          cover-file-name: "./pom.xml"
+          sonar-exclusion: src/main/java
+          cover-file-name: ./pom.xml
           language: "LANGUAGE_JAVA"
 
       - name: Configure git user
