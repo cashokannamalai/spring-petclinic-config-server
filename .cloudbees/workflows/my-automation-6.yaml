@@ -8,20 +8,16 @@ on:
 
 jobs:
   CheckCommitMessage:
+  
     steps:
-      - name: Checkout Code
-        uses: cloudbees-io/checkout@v1
-
-      - name: Check Jira Issue Key in Commit Message
+      - name: Check Commit Message
         uses: docker://alpine/git:latest
         run: |
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-          echo "Commit message: $COMMIT_MESSAGE"
-          if ! echo "$COMMIT_MESSAGE" | grep -E '[A-Z]{2,}-[0-9]+'; then
-            echo "Error: Commit message must include a Jira issue key (e.g., PROJECT-123)."
+          if ! [[ "$COMMIT_MESSAGE" =~ ^CBDEMO-[0-9]+ ]]; then
+            echo "Commit message must include a valid Jira issue key (e.g., CBDEMO-122)."
             exit 1
           fi
-        shell: sh
 
   Build:
     needs: CheckCommitMessage
@@ -37,6 +33,8 @@ jobs:
   SonarQubeScan:
     needs: Build
     steps:
+      - name: Checkout Code
+        uses: cloudbees-io/checkout@v1
       - name: SonarQube Scan
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
         with:
