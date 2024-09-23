@@ -1,57 +1,40 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-name: Jira-Enforced Workflow
+name: My automation
 on:
   push:
     branches:
       - main
-
 jobs:
-  PreCheck:
+  Build:
+    outputs:
+      unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}
+      commit_id: ${{ steps.commitinfo.outputs.commit_id }}
+      commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
     steps:
-
-      - name: Checkout Code
-        uses: cloudbees-io/checkout@v1
-        
       - name: Configure git
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
-
-      - name: Check for Jira Issue Key
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+      - name: Get Commit Info
         uses: docker://alpine/git:latest
+        id: commitinfo
         run: |
-          if ! git log -1 --pretty=%B | grep -qE 'CBDEMO-[0-9]+'; then
-            echo "Error: Commit message must include a Jira issue key (e.g., CBDEMO-122)."
-            exit 1
-          fi
+         COMMIT_ID=$(git rev-parse HEAD)
+         COMMIT_MSG=$(git log -1 --pretty=%B)
 
-  Build:
-    needs: PreCheck
-    steps:
-      - name: Checkout Code
-        uses: cloudbees-io/checkout@v1
+         # Check for the specific JIRA issue key CBDEMO-122
+         if [[ ! "$COMMIT_MSG" =~ CBDEMO-122 ]]; then
+          echo "Error: Commit message must include the JIRA issue key CBDEMO-122." >&2
+          exit 1
+         fi
 
-      - name: Build with Maven
+         echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
+         echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
+
+      - name: Build
         uses: docker://maven:3-eclipse-temurin-17
-        run: mvn clean install
-        shell: sh
-
-  SonarQubeScan:
-    needs: Build
-    steps:
-      - name: Checkout Code
-        uses: cloudbees-io/checkout@v1
-
-      - name: Scan with GitHub Advanced Security
-        uses: cloudbees-io/github-security-sast-scan-code@v1
-        with:
-          token: ${{ secrets.GITHUB_SECRET }}
-          language: LANGUAGE_JAVA
-
-      - name: SonarQube Scan
-        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
-        with:
-          sonar-exclusion: src/main/java
-          cover-file-name: ./pom.xml
-          language: "LANGUAGE_JAVA"
+        run: |
+          mvn clean install
