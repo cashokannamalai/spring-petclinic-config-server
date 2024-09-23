@@ -21,8 +21,8 @@ jobs:
       - name: Check for Jira Issue Key
         uses: docker://alpine/git:latest
         run: |
-          if ! git log -1 --pretty=%B | grep -qE 'JIRA-[0-9]+'; then
-            echo "Error: Commit message must include a Jira issue key (e.g., JIRA-123)."
+          if ! git log -1 --pretty=%B | grep -qE 'CBDEMO-[0-9]+'; then
+            echo "Error: Commit message must include a Jira issue key (e.g., CBDEMO-122)."
             exit 1
           fi
 
