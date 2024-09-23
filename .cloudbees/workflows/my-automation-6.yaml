@@ -7,18 +7,12 @@ on:
       - main
 
 jobs:
-  
-
   Build:
     steps:
       - name: Configure git
         uses: docker://alpine/git:latest
         run: |
-          git config --global user.email "c_aannamalai@cloudbees.com"
-          git config --global user.name "cashokannamalai"
           git config --global --add safe.directory /cloudbees/workspace
-          
-          
 
       - name: Checkout Code
         uses: cloudbees-io/checkout@v1
@@ -33,12 +27,19 @@ jobs:
     steps:
       - name: Checkout Code
         uses: cloudbees-io/checkout@v1
+
       - name: SonarQube Scan
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
         with:
           sonar-exclusion: "src/main/java/**"
           cover-file-name: "./pom.xml"
           language: "LANGUAGE_JAVA"
+
+      - name: Configure git user
+        uses: docker://alpine/git:latest
+        run: |
+          git config --global user.email "c_aannamalai@cloudbees.com"
+          git config --global user.name "cashokannamalai"
 
       - name: Commit changes with JIRA key
         id: commit_changes
