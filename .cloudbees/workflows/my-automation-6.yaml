@@ -1,19 +1,15 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My Automation
-
 on:
-  pull_request:
+  push:
     branches:
-      - ashok
       - main
-
 jobs:
   CheckCommitMessage:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-
   Build:
     needs: CheckCommitMessage
     steps:
@@ -22,6 +18,3 @@ jobs:
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: mvn clean install
-
-  
-   
