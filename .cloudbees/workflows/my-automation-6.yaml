@@ -27,3 +27,9 @@ jobs:
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: mvn clean install
+      - name: Scan with SonarQube bundled
+        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
+        with:
+          sonar-exclusion: src/main/java
+          cover-file-name: ./pom.xml
+          language: LANGUAGE_JAVA
