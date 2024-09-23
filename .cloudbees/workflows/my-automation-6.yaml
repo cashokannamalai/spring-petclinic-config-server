@@ -9,6 +9,10 @@ on:
 jobs:
   PreCheck:
     steps:
+
+      - name: Checkout Code
+        uses: cloudbees-io/checkout@v1
+        
       - name: Configure git
         uses: docker://alpine/git:latest
         run: |
