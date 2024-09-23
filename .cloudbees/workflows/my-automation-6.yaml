@@ -10,6 +10,15 @@ jobs:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
+      - name: Check for Jira issue key in commit message
+        uses: docker://alpine/git:latest
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          if ! echo "$COMMIT_MESSAGE" | grep -E '[A-Z]{2,}-[0-9]+'; then
+            echo "Error: Commit message must include a Jira issue key (e.g., PROJECT-123)."
+            exit 1
+          fi
+
   Build:
     needs: CheckCommitMessage
     steps:
