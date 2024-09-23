@@ -7,23 +7,26 @@ on:
       - main
 
 jobs:
-  Build:
+  PreCheck:
     steps:
       - name: Configure git
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
 
-      - name: Checkout Code
-        uses: cloudbees-io/checkout@v1
-
-      - name: Enforce Jira Issue Key
+      - name: Check for Jira Issue Key
         uses: docker://alpine/git:latest
         run: |
-          if ! git log -1 --pretty=%B | grep -qE 'CBDEMO-[0-9]+'; then
-            echo "Error: Commit message must include a Jira issue key (e.g., CBDEMO-152)."
+          if ! git log -1 --pretty=%B | grep -qE 'JIRA-[0-9]+'; then
+            echo "Error: Commit message must include a Jira issue key (e.g., JIRA-123)."
             exit 1
           fi
+
+  Build:
+    needs: PreCheck
+    steps:
+      - name: Checkout Code
+        uses: cloudbees-io/checkout@v1
 
       - name: Build with Maven
         uses: docker://maven:3-eclipse-temurin-17
