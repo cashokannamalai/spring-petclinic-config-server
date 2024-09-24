@@ -19,22 +19,23 @@ jobs:
       - name: Get Commit Info
         uses: docker://alpine/git:latest
         run: |
-          COMMIT_ID=$(git rev-parse HEAD)
-          COMMIT_MSG=$(git log -1 --pretty=%B)
 
-          # Validate commit message to include JIRA issue key
-          if [[ ! "$COMMIT_MSG" =~ ([A-Z]+-[0-9]+) ]]; then
-            echo "Error: Commit message must include a JIRA issue key." >&2
+           COMMIT_ID=$(git rev-parse HEAD)
+           COMMIT_MSG=$(git log -1 --pretty=%B)
+
+           # Validate commit message to include JIRA issue key (format: ABC-123)
+           if [[ ! "$COMMIT_MSG" =~ ([A-Z]+-[0-9]+) ]]; then
+            echo "Error: Commit message must include a JIRA issue key (e.g., CBDEMO-131)." >&2
             exit 1
-          fi
+           fi
 
-          # Extract JIRA issue key from commit message
-          JIRA_ISSUE_KEY="${BASH_REMATCH[1]}"
+           # Extract JIRA issue key from commit message
+           JIRA_ISSUE_KEY="${BASH_REMATCH[1]}"
 
-          # Save commit info for the next steps
-          echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
-          echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-       
+              # Save commit info for the next steps
+            echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
+            echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
+
 
       
 
