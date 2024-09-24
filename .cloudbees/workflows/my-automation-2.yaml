@@ -65,13 +65,14 @@ jobs:
       MAJOR_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }}
       MINOR_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }}
     steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
+      
       - name: Scan with GitHub Advanced Security
         uses: cloudbees-io/github-security-sast-scan-code@v1
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
         name: Scan
         kind: scan
@@ -86,6 +87,7 @@ jobs:
           sonar-exclusion: src/main/java
           cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
+          
       - uses: cloudbees-io/findsecbugs-sast-scan-code@v1
         name: Scan with Find Security Bugs
         kind: scan
