@@ -23,8 +23,8 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
 
           # Validate commit message to include JIRA issue key
-          if [[ ! "$COMMIT_MSG" =~ CBDEMO-128 ]]; then
-            echo "Error: Commit message must include the JIRA issue key CBDEMO-128." >&2
+          if [[ ! "$COMMIT_MSG" =~ CBDEMO-131 ]]; then
+            echo "Error: Commit message must include the JIRA issue key CBDEMO-131." >&2
             exit 1
           fi
 
@@ -35,21 +35,13 @@ jobs:
       - name: Fetch JIRA Metrics
         uses: docker://alpine/curl:latest
         run: |
-          JIRA_ISSUE_KEY="CBDEMO-128"
+          JIRA_ISSUE_KEY="CBDEMO-131"
           JIRA_API_URL="https://cloudbees.atlassian.net/rest/api/2/issue/${JIRA_ISSUE_KEY}"
          
           response=$(curl -s -u ${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }} ${JIRA_API_URL})
           echo "jira_response=${response}" >> $CLOUDBEES_OUTPUTS/jira_response
 
-      - name: Parse JIRA Metrics
-        uses: docker://stedolan/jq:latest
-        run: |
-          # Load the JIRA response
-          response=$(cat $CLOUDBEES_OUTPUTS/jira_response)
-
-          # Extract velocity details (e.g., story points)
-          velocity=$(echo "${response}" | jq '.fields.customfield_10016') # Adjust the field name as necessary
-          echo "velocity=${velocity}" >> $CLOUDBEES_OUTPUTS/velocity
+     
 
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
