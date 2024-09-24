@@ -17,28 +17,28 @@ jobs:
         uses: cloudbees-io/checkout@v1
 
       - name: Get Commit Info
-        uses: docker://alpine/curl:latest
+        uses: docker://alpine/git:latest
         run: |
           COMMIT_ID=$(git rev-parse HEAD)
           COMMIT_MSG=$(git log -1 --pretty=%B)
 
           # Validate commit message to include JIRA issue key
-          if [[ ! "$COMMIT_MSG" =~ ([A-Z]+-[0-9]+) ]]; then
-            echo "Error: Commit message must include a valid JIRA issue key." >&2
+          if [[ ! "$COMMIT_MSG" =~ CBDEMO-129 ]]; then
+            echo "Error: Commit message must include the JIRA issue key CBDEMO-129." >&2
             exit 1
           fi
-
-          # Extract the JIRA issue key from the commit message
-          JIRA_ISSUE_KEY="${BASH_REMATCH[1]}"
 
           # Save commit info for the next steps
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-          echo "jira_issue_key=${JIRA_ISSUE_KEY}" >> $CLOUDBEES_OUTPUTS/jira_issue_key
 
-      
-          JIRA_API_URL="https://cloudbees.atlassian.net/rest/api/2/issue/${{ steps.get_commit_info.outputs.jira_issue_key }}"
+      - name: Fetch JIRA Metrics
+        uses: docker://alpine/curl:latest
+        run: |
+          JIRA_ISSUE_KEY="CBDEMO-129"
+          JIRA_API_URL="https://cloudbees.atlassian.net/rest/api/2/issue/${JIRA_ISSUE_KEY}"
          
+
           response=$(curl -s -u ${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }} ${JIRA_API_URL})
           echo "jira_response=${response}" >> $CLOUDBEES_OUTPUTS/jira_response
 
