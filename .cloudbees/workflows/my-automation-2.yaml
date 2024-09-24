@@ -181,7 +181,7 @@ jobs:
         id: getIngressIP
         uses: docker://bitnami/kubectl:latest
         run: |
-          INGRESS_IP=$(kubectl get ingress -n ashok -o jsonpath="{.items[*].status.loadBalancer.ingress[*].ip}")
+          INGRESS_IP=$(kubectl get ingress configserver-ingress -n ashok -o jsonpath="{.items[*].status.loadBalancer.ingress[*].ip}")
           echo "Ingress IP: $INGRESS_IP"
           echo "ingress_ip=${INGRESS_IP}" >> $CLOUDBEES_OUTPUTS/ingress_ip
 
