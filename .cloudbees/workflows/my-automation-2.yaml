@@ -162,6 +162,8 @@ jobs:
   Deploy:
     needs: SmokeTest
     environment: production
+    outputs:
+      ingress_ip: ${{ steps.getIngressIP.outputs.ingress_ip }}
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
@@ -174,12 +176,19 @@ jobs:
         kind: deploy
         with:
           kustomization-base-dir: ${{ cloudbees.workspace }}/base
-      - name: Get Ingress URL
+
+      - name: Get Ingress IP
+        id: getIngressIP
         uses: docker://bitnami/kubectl:latest
         run: |
-          kubectl get ingress -n ashok -o jsonpath="{.items[*].status.loadBalancer.ingress[*].ip}" > ingress-url.txt
-          cat ingress-url.txt
+          INGRESS_IP=$(kubectl get ingress -n ashok -o jsonpath="{.items[*].status.loadBalancer.ingress[*].ip}")
+          echo "Ingress IP: $INGRESS_IP"
+          echo "ingress_ip=${INGRESS_IP}" >> $CLOUDBEES_OUTPUTS/ingress_ip
 
-          
-          
+      - name: Publish Ingress IP Evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |
+            ## Deployment Information
+            - **Ingress IP:** "${{ steps.getIngressIP.outputs.ingress_ip }}"
   
