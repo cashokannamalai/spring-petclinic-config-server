@@ -2,8 +2,9 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
-  push:
+  pull_request:
     branches:
+      - ashok
       - main
 jobs:
   Build:
@@ -75,7 +76,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
-  
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
         name: Scan
         kind: scan
@@ -84,22 +84,17 @@ jobs:
           username: ${{ secrets.username }}
           password: ${{ secrets.password }}
           language: Java
-
-
       - name: Scan with SonarQube bundled
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
         with:
           sonar-exclusion: src/main/java
           cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
-          
-   
       - uses: sbatchelder-cba/sonarqube-cba@v0.0.3
         name: Scan GP
         with:
           project-key: config-server
           token: ${{ secrets.token }}
-          
       - name: Fetch SonarQube Issues
         id: FetchSonarQubeIssues
         uses: docker://alpine/git:latest
@@ -181,18 +176,16 @@ jobs:
         kind: deploy
         with:
           kustomization-base-dir: ${{ cloudbees.workspace }}/base
-
       - name: Get Ingress IP
         id: getIngressIP
         uses: docker://bitnami/kubectl:latest
         run: |
-         INGRESS_IP=$(kubectl get ingress configserver-ingress -n ashok -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-         echo "Ingress IP: $INGRESS_IP"
-         echo "ingress_ip=${INGRESS_IP}" >> $CLOUDBEES_OUTPUTS/ingress_ip
-
+          INGRESS_IP=$(kubectl get ingress configserver-ingress -n ashok -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+          echo "Ingress IP: $INGRESS_IP"
+          echo "ingress_ip=${INGRESS_IP}" >> $CLOUDBEES_OUTPUTS/ingress_ip
       - name: Publish Ingress IP Evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
-         content: |
-           ## Deployment Information
-            - **Ingress IP:** "${{ steps.getIngressIP.outputs.ingress_ip }}/config"
+          content: |
+            ## Deployment Information
+             - **Ingress IP:** "${{ steps.getIngressIP.outputs.ingress_ip }}/config"
