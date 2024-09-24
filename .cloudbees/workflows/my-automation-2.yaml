@@ -190,4 +190,4 @@ jobs:
         with:
          content: |
            ## Deployment Information
-            - **Ingress IP:** "${{ steps.getIngressIP.outputs.ingress_ip }}"
+            - **Ingress IP:** "${{ steps.getIngressIP.outputs.ingress_ip }}/config"
