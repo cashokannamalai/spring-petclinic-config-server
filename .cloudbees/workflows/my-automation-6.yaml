@@ -32,10 +32,17 @@ jobs:
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
 
+      - name: Fetch JIRA Metrics
+        uses: docker://alpine/curl:latest
+        run: |
+          JIRA_ISSUE_KEY="CBDEMO-152"
+          JIRA_API_URL="https://cloudbees.atlassian.net/rest/api/2/issue/${JIRA_ISSUE_KEY}"
+         
+
+          response=$(curl -s -u ${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }} ${JIRA_API_URL})
+          echo "jira_response=${response}" >> $CLOUDBEES_OUTPUTS/jira_response
+
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-          
-
-          
