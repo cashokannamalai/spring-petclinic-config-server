@@ -65,7 +65,9 @@ jobs:
       MAJOR_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }}
       MINOR_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }}
     steps:
-      
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+        
       - name: Scan with GitHub Advanced Security
         uses: cloudbees-io/github-security-sast-scan-code@v1
         with:
@@ -80,6 +82,8 @@ jobs:
           username: ${{ secrets.username }}
           password: ${{ secrets.password }}
           language: Java
+
+
       - name: Scan with SonarQube bundled
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
         with:
@@ -87,11 +91,7 @@ jobs:
           cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
           
-      - uses: cloudbees-io/findsecbugs-sast-scan-code@v1
-        name: Scan with Find Security Bugs
-        kind: scan
-        with:
-          language: LANGUAGE_JAVA
+   
       - uses: sbatchelder-cba/sonarqube-cba@v0.0.3
         name: Scan GP
         with:
