@@ -23,8 +23,8 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
 
           # Validate commit message to include JIRA issue key
-          if [[ ! "$COMMIT_MSG" =~ CBDEMO-129 ]]; then
-            echo "Error: Commit message must include the JIRA issue key CBDEMO-129." >&2
+          if [[ ! "$COMMIT_MSG" =~ CBDEMO-125 ]]; then
+            echo "Error: Commit message must include the JIRA issue key CBDEMO-125." >&2
             exit 1
           fi
 
@@ -35,7 +35,7 @@ jobs:
       - name: Fetch JIRA Metrics
         uses: docker://alpine/curl:latest
         run: |
-          JIRA_ISSUE_KEY="CBDEMO-129"
+          JIRA_ISSUE_KEY="CBDEMO-125"
           JIRA_API_URL="https://cloudbees.atlassian.net/rest/api/2/issue/${JIRA_ISSUE_KEY}"
          
 
