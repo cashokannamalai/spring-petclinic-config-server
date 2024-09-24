@@ -17,7 +17,7 @@ jobs:
         uses: cloudbees-io/checkout@v1
 
       - name: Get Commit Info
-        uses: docker://alpine/git:latest
+        uses: docker://alpine/curl:latest
         run: |
           COMMIT_ID=$(git rev-parse HEAD)
           COMMIT_MSG=$(git log -1 --pretty=%B)
@@ -36,9 +36,7 @@ jobs:
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
           echo "jira_issue_key=${JIRA_ISSUE_KEY}" >> $CLOUDBEES_OUTPUTS/jira_issue_key
 
-      - name: Fetch JIRA Metrics
-        uses: docker://alpine/curl:latest
-        run: |
+      
           JIRA_API_URL="https://cloudbees.atlassian.net/rest/api/2/issue/${{ steps.get_commit_info.outputs.jira_issue_key }}"
          
           response=$(curl -s -u ${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }} ${JIRA_API_URL})
