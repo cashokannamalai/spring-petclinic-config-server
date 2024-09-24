@@ -181,14 +181,13 @@ jobs:
         id: getIngressIP
         uses: docker://bitnami/kubectl:latest
         run: |
-          INGRESS_IP=$(kubectl get ingress configserver-ingress -n ashok -o jsonpath="{.items[*].status.loadBalancer.ingress[*].ip}")
-          echo "Ingress IP: $INGRESS_IP"
-          echo "ingress_ip=${INGRESS_IP}" >> $CLOUDBEES_OUTPUTS/ingress_ip
+         INGRESS_IP=$(kubectl get ingress configserver-ingress -n ashok -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+         echo "Ingress IP: $INGRESS_IP"
+         echo "ingress_ip=${INGRESS_IP}" >> $CLOUDBEES_OUTPUTS/ingress_ip
 
       - name: Publish Ingress IP Evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
-          content: |
-            ## Deployment Information
+         content: |
+           ## Deployment Information
             - **Ingress IP:** "${{ steps.getIngressIP.outputs.ingress_ip }}"
-  
