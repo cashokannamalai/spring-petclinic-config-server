@@ -1,6 +1,6 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-name: My automation
+name: My Automation
 on:
   push:
     branches:
@@ -38,7 +38,6 @@ jobs:
           JIRA_ISSUE_KEY="CBDEMO-128"
           JIRA_API_URL="https://cloudbees.atlassian.net/rest/api/2/issue/${JIRA_ISSUE_KEY}"
          
-
           response=$(curl -s -u ${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }} ${JIRA_API_URL})
           echo "jira_response=${response}" >> $CLOUDBEES_OUTPUTS/jira_response
 
@@ -46,4 +45,23 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
+
+      - name: Calculate Throughput and Velocity
+        uses: docker://alpine/git:latest
+        run: |
+          # Assuming `completed_items` is the number of work items completed
+          completed_items=241  # Example value for demonstration
+          time_frame_weeks=1   # Example time frame in weeks
+
+          # Log the throughput
+          echo "throughput=${completed_items}" >> $CLOUDBEES_OUTPUTS/throughput
           
+          # Calculate velocity
+          velocity=$(echo "scale=2; $completed_items / $time_frame_weeks" | bc)
+          echo "velocity=${velocity}" >> $CLOUDBEES_OUTPUTS/velocity
+
+      - name: Output Metrics
+        uses: docker://alpine/git:latest
+        run: |
+          echo "Throughput: $(cat $CLOUDBEES_OUTPUTS/throughput)"
+          echo "Velocity: $(cat $CLOUDBEES_OUTPUTS/velocity)"
