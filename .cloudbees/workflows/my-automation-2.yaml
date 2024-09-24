@@ -91,13 +91,6 @@ jobs:
           cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
           
-   
-      - uses: sbatchelder-cba/sonarqube-cba@v0.0.3
-        name: Scan GP
-        with:
-          project-key: config-server
-          token: ${{ secrets.token }}
-          
       - name: Fetch SonarQube Issues
         id: FetchSonarQubeIssues
         uses: docker://alpine/git:latest
