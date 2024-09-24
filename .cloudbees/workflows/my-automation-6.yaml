@@ -21,12 +21,14 @@ jobs:
         run: |
           COMMIT_ID=$(git rev-parse HEAD)
           COMMIT_MSG=$(git log -1 --pretty=%B)
-          
-          if [[ ! "$COMMIT_MSG" =~ CBDEMO-122 ]]; then
-            echo "Error: Commit message must include the JIRA issue key CBDEMO-122." >&2
+
+          # Validate commit message to include JIRA issue key
+          if [[ ! "$COMMIT_MSG" =~ CBDEMO-152 ]]; then
+            echo "Error: Commit message must include the JIRA issue key CBDEMO-152." >&2
             exit 1
           fi
-          
+
+          # Save commit info for the next steps
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
 
