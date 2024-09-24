@@ -56,6 +56,11 @@ jobs:
           test-type: JUnit
           folder-name: src/test/java
 
+      - name: Scan with Find Security Bugs
+        uses: cloudbees-io/findsecbugs-sast-scan-code@v1
+        with:
+          language: "LANGUAGE_JAVA"
+
 
 
       
