@@ -23,22 +23,24 @@ jobs:
           COMMIT_MSG=$(git log -1 --pretty=%B)
 
           # Validate commit message to include JIRA issue key
-          if [[ ! "$COMMIT_MSG" =~ CBDEMO-131 ]]; then
-            echo "Error: Commit message must include the JIRA issue key CBDEMO-131." >&2
+          if [[ ! "$COMMIT_MSG" =~ ([A-Z]+-[0-9]+) ]]; then
+            echo "Error: Commit message must include a JIRA issue key." >&2
             exit 1
           fi
+
+          # Extract JIRA issue key from commit message
+          JIRA_ISSUE_KEY="${BASH_REMATCH[1]}"
 
           # Save commit info for the next steps
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
+          echo "jira_issue_key=${JIRA_ISSUE_KEY}" >> $CLOUDBEES_OUTPUTS/jira_issue_key
 
       - name: Fetch JIRA Metrics
         uses: docker://alpine/curl:latest
         run: |
-          JIRA_ISSUE_KEY="CBDEMO-131"
-          JIRA_API_URL="https://cloudbees.atlassian.net/rest/api/2/issue/${JIRA_ISSUE_KEY}"
+          JIRA_API_URL="https://cloudbees.atlassian.net/rest/api/2/issue/${{ steps.get_commit_info.outputs.jira_issue_key }}"
          
-
           response=$(curl -s -u ${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }} ${JIRA_API_URL})
           echo "jira_response=${response}" >> $CLOUDBEES_OUTPUTS/jira_response
 
@@ -46,4 +48,3 @@ jobs:
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-          
