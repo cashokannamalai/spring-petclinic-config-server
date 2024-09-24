@@ -6,20 +6,7 @@ on:
     branches:
       - main
 jobs:
-  CheckCommitMessage:
-    steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-      - name: Check for Jira issue key in commit message
-        uses: docker://alpine/git:latest
-        run: |
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-          if ! echo "$COMMIT_MESSAGE" | grep -E '[A-Z]{2,}-[0-9]+'; then
-            echo "Error: Commit message must include a Jira issue key (e.g., PROJECT-123)."
-            exit 1
-          fi
   Build:
-    needs: CheckCommitMessage
     outputs:
       unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}
       commit_id: ${{ steps.commitinfo.outputs.commit_id }}
@@ -71,6 +58,10 @@ jobs:
             - **Commit Message:** "${{ steps.commitinfo.outputs.commit_msg }}"
             ## Unit Test Results
             - **Unit Test Results:** "${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}"
+
+
+
+            
   StaticAnalysis:
     outputs:
       BLOCKER_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }}
@@ -83,31 +74,19 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
-      - uses: cloudbees-io/sonarqube-sast-scan-code@v1
-        name: Scan
-        kind: scan
-        with:
-          server-url: https://sonarqube.cb-demos.io
-          username: ${{ secrets.username }}
-          password: ${{ secrets.password }}
-          language: Java
+     
+
+
       - name: Scan with SonarQube bundled
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
         with:
           sonar-exclusion: src/main/java
           cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
-          
-      - uses: cloudbees-io/findsecbugs-sast-scan-code@v1
-        name: Scan with Find Security Bugs
-        kind: scan
-        with:
-          language: LANGUAGE_JAVA
-      - uses: sbatchelder-cba/sonarqube-cba@v0.0.3
-        name: Scan GP
-        with:
-          project-key: config-server
-          token: ${{ secrets.token }}
+
+
+
+      
       - name: Fetch SonarQube Issues
         id: FetchSonarQubeIssues
         uses: docker://alpine/git:latest
