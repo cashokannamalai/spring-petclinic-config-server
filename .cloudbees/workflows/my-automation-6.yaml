@@ -1,6 +1,6 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-name: My Automation
+name: My automation
 on:
   push:
     branches:
@@ -38,12 +38,12 @@ jobs:
           JIRA_ISSUE_KEY="CBDEMO-131"
           JIRA_API_URL="https://cloudbees.atlassian.net/rest/api/2/issue/${JIRA_ISSUE_KEY}"
          
+
           response=$(curl -s -u ${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }} ${JIRA_API_URL})
           echo "jira_response=${response}" >> $CLOUDBEES_OUTPUTS/jira_response
-
-     
 
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
+          
