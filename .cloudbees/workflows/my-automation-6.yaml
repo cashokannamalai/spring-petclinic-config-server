@@ -41,27 +41,17 @@ jobs:
           response=$(curl -s -u ${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }} ${JIRA_API_URL})
           echo "jira_response=${response}" >> $CLOUDBEES_OUTPUTS/jira_response
 
+      - name: Parse JIRA Metrics
+        uses: docker://stedolan/jq:latest
+        run: |
+          # Load the JIRA response
+          response=$(cat $CLOUDBEES_OUTPUTS/jira_response)
+
+          # Extract velocity details (e.g., story points)
+          velocity=$(echo "${response}" | jq '.fields.customfield_10016') # Adjust the field name as necessary
+          echo "velocity=${velocity}" >> $CLOUDBEES_OUTPUTS/velocity
+
       - name: Build
         uses: docker://maven:3-eclipse-temurin-17
         run: |
           mvn clean install
-
-      - name: Calculate Throughput and Velocity
-        uses: docker://alpine/git:latest
-        run: |
-          # Assuming `completed_items` is the number of work items completed
-          completed_items=241  # Example value for demonstration
-          time_frame_weeks=1   # Example time frame in weeks
-
-          # Log the throughput
-          echo "throughput=${completed_items}" >> $CLOUDBEES_OUTPUTS/throughput
-          
-          # Calculate velocity
-          velocity=$(echo "scale=2; $completed_items / $time_frame_weeks" | bc)
-          echo "velocity=${velocity}" >> $CLOUDBEES_OUTPUTS/velocity
-
-      - name: Output Metrics
-        uses: docker://alpine/git:latest
-        run: |
-          echo "Throughput: $(cat $CLOUDBEES_OUTPUTS/throughput)"
-          echo "Velocity: $(cat $CLOUDBEES_OUTPUTS/velocity)"
