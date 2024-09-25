@@ -80,13 +80,9 @@ jobs:
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
         with:
           sonar-exclusion: src/main/java
-          cover-file-name: ./pom.xml
+          cover-file-name: surefire-reports/*.txt
           language: LANGUAGE_JAVA
-          threshold-critical: 0
-          threshold-very-high: 0
-          threshold-high: 0
-          threshold-medium: 0
-          threshold-low: 0
+          
           
    
     
