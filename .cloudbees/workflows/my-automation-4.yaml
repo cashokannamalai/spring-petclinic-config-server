@@ -23,6 +23,8 @@ jobs:
         name: scan
         kind: scan
         with:
+          sonar-host-url: https://sonarqube.cb-demos.io
+          sonar-login: ${{ secrets.token }}
           sonar-exclusion: src/main/java
           cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
