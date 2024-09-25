@@ -20,12 +20,11 @@ jobs:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
      
-      - uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
-        name: scan
-        kind: scan
+      - name: Scan with SonarQube bundled
+        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
         with:
-          sonar-exclusion: src/main/java
-          cover-file-name: ./pom.xml
+          sonar-exclusion: src/main/java/org/springframework/samples/petclinic/config
+          cover-file-name: surefire-reports/org.springframework.samples.petclinic.config.PetclinicConfigServerApplicationTests.txt
           language: LANGUAGE_JAVA
 
       - name: Publish test results
