@@ -26,6 +26,13 @@ jobs:
           server-url: https://sonarqube.cb-demos.io
           username: ${{ secrets.username }}
           password: ${{ secrets.password }}
+
+      - uses: sbatchelder-cba/sonarqube-cba@v0.0.3
+        name: Scan GP
+        with:
+          project-key: config-server
+          token: ${{ secrets.token }}
+          
       - uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
         name: scan
         kind: scan
