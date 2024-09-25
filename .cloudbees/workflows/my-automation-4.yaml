@@ -82,6 +82,18 @@ jobs:
           sonar-exclusion: src/main/java
           cover-file-name: /.pom.xml
           language: LANGUAGE_JAVA
+
+
+  SonarScan:
+    needs: Build
+    steps:
+      - name: Run SonarQube analysis
+        uses: docker://maven:3-eclipse-temurin-17
+        run: |
+          mvn sonar:sonar \
+            -Dsonar.projectKey=config-server \
+            -Dsonar.host.url=https://sonarqube.cb-demos.io \
+            -Dsonar.login=${{ secrets.token }}
           
           
    
