@@ -19,12 +19,17 @@ jobs:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
+      - uses: cloudbees-io/sonarqube-sast-scan-code@v1
+        name: Scan
+        kind: scan
+        with:
+          server-url: https://sonarqube.cb-demos.io
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
       - uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
         name: scan
         kind: scan
         with:
-          sonar-host-url: https://sonarqube.cb-demos.io
-          sonar-login: ${{ secrets.token }}
           sonar-exclusion: src/main/java
           cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
