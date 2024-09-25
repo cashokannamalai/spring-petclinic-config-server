@@ -87,6 +87,8 @@ jobs:
   SonarScan:
     needs: Build
     steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
       - name: Run SonarQube analysis
         uses: docker://maven:3-eclipse-temurin-17
         run: |
