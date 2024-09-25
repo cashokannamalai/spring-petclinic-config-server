@@ -10,6 +10,8 @@
     <description>Spring PetClinic Config Server</description>
 
     <properties>
+         <maven.compiler.source>17</maven.compiler.source>
+         <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
         <docker.image.exposed.port>8888</docker.image.exposed.port>
         <docker.image.dockerfile.dir>${basedir}/../docker</docker.image.dockerfile.dir>
