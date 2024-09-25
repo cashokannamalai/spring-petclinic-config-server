@@ -2,9 +2,8 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
-  pull_request:
+  push:
     branches:
-      - ashok
       - main
 jobs:
   Build:
@@ -25,7 +24,7 @@ jobs:
         run: |
           COMMIT_ID=$(git rev-parse HEAD)
           COMMIT_MSG=$(git log -1 --pretty=%B)
-       
+
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
       - name: Build
@@ -185,4 +184,10 @@ jobs:
           content: |
             ## Deployment Information
              - **Ingress IP:** "${{ steps.getIngressIP.outputs.ingress_ip }}/config"
-
+  Buildsample:
+    steps:
+      - uses: docker://maven:3-eclipse-temurin-17
+        name: Build1
+        kind: build
+        run: mvn clean package
+        shell: sh
