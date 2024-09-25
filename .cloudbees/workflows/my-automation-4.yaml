@@ -197,10 +197,10 @@ jobs:
     steps:
       - uses: cloudbees-io/publish-test-results@v1
         name: scan
-        kind: scan
+        kind: test
         with:
           test-type: JUNIT
-          folder-name: test_report.xml
+          folder-name: src/test/java
   e:
     steps:
       - uses: cloudbees-io/publish-test-results@v1
