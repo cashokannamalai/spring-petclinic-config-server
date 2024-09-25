@@ -73,7 +73,14 @@ jobs:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
   
-     
+      - uses: cloudbees-io/sonarqube-sast-scan-code@v1
+        name: Scan
+        kind: scan
+        with:
+          server-url: https://sonarqube.cb-demos.io
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
+          language: LANGUAGE_JAVA
 
 
       - name: Scan with SonarQube bundled
