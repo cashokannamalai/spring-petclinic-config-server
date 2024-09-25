@@ -32,5 +32,5 @@ jobs:
         uses: cloudbees-io/publish-test-results@v1
         with:
           test-type: JUnit
-          folder-name: src/main/test/java
+          folder-name: src/main/java
          
