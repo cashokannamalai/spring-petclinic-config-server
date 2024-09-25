@@ -109,7 +109,7 @@ jobs:
       - name: Publish test results
         uses: cloudbees-io/publish-test-results@v1
         with:
-          test-type: JUnit
+          test-type: TestNG
           folder-name: target/surefire-reports/*.xml
           
       
