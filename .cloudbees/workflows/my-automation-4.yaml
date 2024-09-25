@@ -110,6 +110,6 @@ jobs:
         uses: cloudbees-io/publish-test-results@v1
         with:
           test-type: JUnit
-          folder-name: surefire-reports/*.txt
+          folder-name: target/surefire-reports/*.xml
           
       
