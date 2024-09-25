@@ -188,9 +188,24 @@ jobs:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-        
       - uses: docker://maven:3-eclipse-temurin-17
         name: Build1
         kind: build
         run: mvn clean package
         shell: sh
+  sacn1:
+    steps:
+      - uses: cloudbees-io/publish-test-results@v1
+        name: scan
+        kind: scan
+        with:
+          test-type: JUNIT
+          folder-name: test_report.xml
+  e:
+    steps:
+      - uses: cloudbees-io/publish-test-results@v1
+        name: e
+        kind: test
+        with:
+          test-type: TESTING
+          folder-name: test_report.xml
