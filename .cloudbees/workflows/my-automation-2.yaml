@@ -30,10 +30,13 @@ jobs:
           fi
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-      - name: Build
-        uses: docker://maven:3-eclipse-temurin-17
-        run: |
-          mvn clean install
+          
+      - uses: docker://maven:3-eclipse-temurin-17
+        name: Build
+        kind: build
+        run: mvn clean package
+        shell: sh
+
       - name: RunUnitTest
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
