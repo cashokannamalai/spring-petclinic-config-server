@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
      
-      - uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
+      - uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
         name: scan
         kind: scan
         with:
