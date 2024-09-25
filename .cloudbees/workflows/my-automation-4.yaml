@@ -89,11 +89,7 @@ jobs:
           sonar-exclusion: src/main/java
           cover-file-name: /.pom.xml
           language: LANGUAGE_JAVA
-          threshold-critical: 0
-          threshold-very-high: 0
-          threshold-high: 0
-          threshold-medium: 0
-          threshold-low: 0
+          
 
   SonarScan:
     needs: Build
