@@ -15,11 +15,12 @@ jobs:
         kind: build
         run: mvn clean package
         shell: sh
-  sacn1:
+  Scan:
     steps:
-      - uses: cloudbees-io/publish-test-results@v1
+      - uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
         name: scan
-        kind: test
+        kind: scan
         with:
-          test-type: TESTING
-          folder-name: pom.xml
+          language: LANGUAGE_JAVA
+          cover-file-name: pom.xml
+          sonar-exclusion: src/main/java
