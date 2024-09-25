@@ -25,7 +25,7 @@ jobs:
         with:
           server-url: https://sonarqube.cb-demos.io
           username: ${{ secrets.username }}
-          password: ${{ secrets.password }}
+          password: ${{ secrets.token }}
       - uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
         name: scan
         kind: scan
