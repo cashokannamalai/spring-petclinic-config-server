@@ -58,6 +58,13 @@
             <version>3.1.3</version>
         </dependency>
 
+
+        <dependency>
+    <groupId>io.rollout.rox</groupId>
+    <artifactId>rox-java-server</artifactId>
+    <version>5.0.10</version>
+</dependency>
+
         <!-- Spring Context -->
         <dependency>
             <groupId>org.springframework</groupId>
