@@ -24,3 +24,15 @@ jobs:
         with:
           test-type: ProdPerfect
           folder-name: testresults/
+  samole:
+    steps:
+      - uses: cloudbees-io/checkout@v1
+        name: Checkout
+      - uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
+        name: sample
+        kind: scan
+        with:
+          sonar-inclusion: src/test/java
+          sonar-exclusion: src/main/java
+          cover-file-name: pom.xml
+          language: LANGUAGE_JAVA
