@@ -29,32 +29,16 @@ jobs:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
           branch-name: main
-      - uses: cloudbees-io/sonarqube-sast-scan-code@v1
-        name: Scan
-        kind: scan
-        with:
-          server-url: https://sonarqube.cb-demos.io
-          username: ${{ secrets.username }}
-          password: ${{ secrets.password }}
-          language: LANGUAGE_JAVA
+      
       - name: Scan with SonarQube bundled
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
         with:
           sonar-exclusion: src/main/java
           cover-file-name: /.pom.xml
           language: LANGUAGE_JAVA
-  SonarScan:
-    needs: Build
-    steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-      - name: Run SonarQube analysis
-        uses: docker://maven:3-eclipse-temurin-17
-        run: |
-          mvn sonar:sonar \
-            -Dsonar.projectKey=config-server \
-            -Dsonar.host.url=https://sonarqube.cb-demos.io \
-            -Dsonar.login=${{ secrets.token }}
+
+
+  
   sample:
     steps:
       - name: Checkout
@@ -64,14 +48,7 @@ jobs:
         kind: test
         run: mvn test
         shell: sh
-  scan12:
-    steps:
-      - uses: cloudbees-io/github-security-sast-scan-code@v1
-        name: sample12
-        kind: scan
-        with:
-          token: ${{ secrets.GITHUB_SECRET }}
-          language: LANGUAGE_JAVA
+
   hv:
     steps:
       - name: Checkout
@@ -90,4 +67,4 @@ jobs:
           token: ${{ secrets.GITHUB_SECRET }}
           language: "LANGUAGE_JAVA"
           github-url: https://github.com/cashokannamalai/spring-petclinic-config-server.git
-          branch-name: main
+          branch-name: ashok
