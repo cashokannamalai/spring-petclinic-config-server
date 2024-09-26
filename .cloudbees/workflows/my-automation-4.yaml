@@ -24,16 +24,14 @@ jobs:
         run: |
           COMMIT_ID=$(git rev-parse HEAD)
           COMMIT_MSG=$(git log -1 --pretty=%B)
-         
+
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-          
       - uses: docker://maven:3-eclipse-temurin-17
         name: Build
         kind: build
         run: mvn clean package
         shell: sh
-
       - name: RunUnitTest
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
@@ -63,7 +61,6 @@ jobs:
             ## Unit Test Results
             - **Unit Test Results:** "${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}"
   StaticAnalysis:
-
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
@@ -72,7 +69,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
-  
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
         name: Scan
         kind: scan
@@ -81,16 +77,15 @@ jobs:
           username: ${{ secrets.username }}
           password: ${{ secrets.password }}
           language: LANGUAGE_JAVA
-
-
       - name: Scan with SonarQube bundled
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
         with:
           sonar-exclusion: src/main/java
           cover-file-name: /.pom.xml
           language: LANGUAGE_JAVA
-          
-
+      - name: Scan with SonarQube bundled action
+        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
+        
   SonarScan:
     needs: Build
     steps:
@@ -103,13 +98,11 @@ jobs:
             -Dsonar.projectKey=config-server \
             -Dsonar.host.url=https://sonarqube.cb-demos.io \
             -Dsonar.login=${{ secrets.token }}
-          
-          
-   
-      - name: Publish test results
-        uses: cloudbees-io/publish-test-results@v1
-        with:
-          test-type: StaticAnalysis
-          folder-name: target/surefire-reports/*.xml
-          
-      
+     
+  sample:
+    steps:
+      - uses: docker://maven:3-eclipse-temurin-17
+        name: test
+        kind: test
+        run: mvn test
+        shell: sh
