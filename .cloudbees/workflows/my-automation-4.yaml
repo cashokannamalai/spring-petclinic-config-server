@@ -54,6 +54,11 @@ jobs:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
 
+      - name: Run TruffleHog secret scan on local source code
+        uses: cloudbees-io/trufflehog-secret-scan-code@v1
+        with:
+          branch: ${{ cloudbees.scm.branch }}
+
       - uses: cloudbees-io/publish-test-results@v1
         name: Publish test results
         kind: test
