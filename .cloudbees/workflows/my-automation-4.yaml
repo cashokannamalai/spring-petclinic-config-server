@@ -22,11 +22,9 @@ jobs:
    
  
 
-      - uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
-        name: sample
-        kind: scan
+      - name: Scan with Snyk SCA
+        uses: cloudbees-io/snyk-sca-scan-dependency@v1
         with:
-
-          sonar-exclusion: src/main/java
-          cover-file-name: ./pom.xml
-          language: LANGUAGE_JAVA
+          orgname: "Vimanthan 03"
+          token: ${{ secrets.SNYK_SECRET }}
+          language: "LANGUAGE_JAVA"
