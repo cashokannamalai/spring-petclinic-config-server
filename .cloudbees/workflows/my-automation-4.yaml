@@ -7,7 +7,6 @@ on:
       - main
 jobs:
   Build:
-   
     steps:
       - name: Configure git
         uses: docker://alpine/git:latest
@@ -15,31 +14,21 @@ jobs:
           git config --global --add safe.directory /cloudbees/workspace
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-    
       - uses: docker://maven:3-eclipse-temurin-17
         name: Build
         kind: build
         run: mvn clean package
         shell: sh
-    
-
-
-
   StaticAnalysis:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-
-
       - name: Scan with GitHub Advanced Security
         uses: cloudbees-io/github-security-sast-scan-code@v1
         with:
           token: ${{ secrets.GITHUB_SECRET }}
-          language: "LANGUAGE_JAVA"
-          branch-name: "main"
-
-
-
+          language: LANGUAGE_JAVA
+          branch-name: main
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
         name: Scan
         kind: scan
@@ -48,16 +37,12 @@ jobs:
           username: ${{ secrets.username }}
           password: ${{ secrets.password }}
           language: LANGUAGE_JAVA
-
-
       - name: Scan with SonarQube bundled
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
         with:
           sonar-exclusion: src/main/java
           cover-file-name: /.pom.xml
           language: LANGUAGE_JAVA
-     
-        
   SonarScan:
     needs: Build
     steps:
@@ -70,7 +55,6 @@ jobs:
             -Dsonar.projectKey=config-server \
             -Dsonar.host.url=https://sonarqube.cb-demos.io \
             -Dsonar.login=${{ secrets.token }}
-     
   sample:
     steps:
       - name: Checkout
@@ -80,3 +64,11 @@ jobs:
         kind: test
         run: mvn test
         shell: sh
+  scan12:
+    steps:
+      - uses: cloudbees-io/github-security-sast-scan-code@v1
+        name: sample12
+        kind: scan
+        with:
+          token: ${{ secrets.GITHUB_SECRET }}
+          language: LANGUAGE_JAVA
