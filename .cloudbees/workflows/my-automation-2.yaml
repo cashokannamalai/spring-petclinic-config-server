@@ -78,15 +78,7 @@ jobs:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
   
-      - uses: cloudbees-io/sonarqube-sast-scan-code@v1
-        name: Scan
-        kind: scan
-        with:
-          server-url: https://sonarqube.cb-demos.io
-          username: ${{ secrets.username }}
-          password: ${{ secrets.password }}
-          language: Java
-
+     
 
       - name: Scan with SonarQube bundled
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
@@ -95,12 +87,7 @@ jobs:
           cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
           
-   
-      - uses: sbatchelder-cba/sonarqube-cba@v0.0.3
-        name: Scan GP
-        with:
-          project-key: config-server
-          token: ${{ secrets.token }}
+
           
       - name: Fetch SonarQube Issues
         id: FetchSonarQubeIssues
@@ -108,7 +95,7 @@ jobs:
         run: |
           apk add --no-cache curl jq
           curl -u ${{ secrets.username }}:${{ secrets.password }} \
-          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR" \
+          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server&severities=BLOCKER,CRITICAL,MAJOR" \
           -o sonar-issues.json
           BLOCKER_COUNT=$(jq '[.issues[] | select(.severity=="BLOCKER")] | length' sonar-issues.json)
           CRITICAL_COUNT=$(jq '[.issues[] | select(.severity=="CRITICAL")] | length' sonar-issues.json)
@@ -129,8 +116,11 @@ jobs:
             |------------------------|
 
             |  ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }} |
+
             | ${{ steps.FetchSonarQubeIssues.outputs.CRITICAL_COUNT }} |
+
             | ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }} |
+            
             |  ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }} |
   ArtifactPublish:
     needs: Build
