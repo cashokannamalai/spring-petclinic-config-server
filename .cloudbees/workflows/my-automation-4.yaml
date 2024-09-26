@@ -8,20 +8,19 @@ on:
 jobs:
   Build:
     steps:
-      - name: Configure git
-        uses: docker://alpine/git:latest
+      - uses: docker://alpine/git:latest
+        name: Configure git
         run: |
           git config --global --add safe.directory /cloudbees/workspace
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
+      - uses: cloudbees-io/checkout@v1
+        name: Checkout
       - uses: docker://maven:3-eclipse-temurin-17
         name: Build
         kind: build
         run: mvn clean test
         shell: sh
-      - name: Scan with GitHub Advanced Security
-        uses: cloudbees-io/github-security-sast-scan-code@v1
+      - uses: cloudbees-io/publish-test-results@v1
+        kind: test
         with:
-          token: ${{ secrets.GITHUB_SECRET }}
-          language: "LANGUAGE_JAVA"
-          branch-name: main
+          test-type: ProdPerfect
+          folder-name: testresults/
