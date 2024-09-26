@@ -29,12 +29,15 @@ jobs:
           branch: ${{ cloudbees.scm.branch }}
   sa:
     steps:
-      - name: Check out source code
-        uses: cloudbees-io/checkout@v1
+      - uses: cloudbees-io/checkout@v1
+        name: Check out source code
       - uses: cloudbees-io/trufflehog-secret-scan-code@v1
         name: te
-        kind: test
+        kind: scan
         with:
           repoUrl: https://github.com/cashokannamalai/spring-petclinic-config-server.git
           branch: main
           token: ${{ secrets.GITHUB_SECRET }}
+          path: .
+          since-commit: main
+          threshold-very-high: "10"
