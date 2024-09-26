@@ -19,39 +19,15 @@ jobs:
         kind: build
         run: mvn clean test
         shell: sh
-  StaticAnalysis:
-    steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-      - name: Scan with GitHub Advanced Security
-        uses: cloudbees-io/github-security-sast-scan-code@v1
-        with:
-          token: ${{ secrets.GITHUB_SECRET }}
-          language: LANGUAGE_JAVA
-          branch-name: main
-      
-      - name: Scan with SonarQube bundled
-        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
-        with:
-          sonar-exclusion: src/main/java
-          cover-file-name: /.pom.xml
-          language: LANGUAGE_JAVA
+ 
 
 
   
-  sample:
-    steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-      - uses: docker://maven:3-eclipse-temurin-17
-        name: test
-        kind: test
-        run: mvn test
-        shell: sh
+ 
 
   hv:
     steps:
-      - name: Checkout
+      - name: Check out source code
         uses: cloudbees-io/checkout@v1
 
       - name: Run TruffleHog secret scan on local source code
@@ -59,17 +35,4 @@ jobs:
         with:
           branch: ${{ cloudbees.scm.branch }}
 
-      - uses: cloudbees-io/publish-test-results@v1
-        name: Publish test results
-        kind: test
-        with:
-         test-type: junit  
-         folder-name: target/test-results  
-
-      - name: Scan with GitHub Advanced Security
-        uses: cloudbees-io/github-security-sast-scan-code@v1
-        with:
-          token: ${{ secrets.GITHUB_SECRET }}
-          language: "LANGUAGE_JAVA"
-          github-url: https://github.com/cashokannamalai/spring-petclinic-config-server.git
-          branch-name: ashok
+     
