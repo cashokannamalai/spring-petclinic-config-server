@@ -19,11 +19,7 @@ jobs:
         kind: build
         run: mvn clean test
         shell: sh
-      - uses: cloudbees-io/publish-test-results@v1
-        kind: test
-        with:
-          test-type: ProdPerfect
-          folder-name: testresults/
+   
   samole:
     steps:
       - uses: cloudbees-io/checkout@v1
