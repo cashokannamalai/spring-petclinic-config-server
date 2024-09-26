@@ -72,10 +72,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
-  vh:
+  hv:
     steps:
-      - uses: cloudbees-io/findsecbugs-sast-scan-code@v1
-        name: sa
-        kind: scan
+      - uses: cloudbees-io/publish-test-results@v1
+        name: hjgj
+        kind: test
         with:
-          language: LANGUAGE_JAVA
+          test-type: JUNIT
+          folder-name: test_report.xml
