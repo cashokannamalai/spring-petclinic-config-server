@@ -38,10 +38,13 @@ jobs:
           orgname: ashok.alogicfocus
           token: 79781dde-8b3d-45c6-9561-a2ebc1e9e18c
           language: LANGUAGE_JAVA
-
-      - name: Scan with Snyk SCA
-        uses: cloudbees-io/snyk-sca-scan-dependency@v1
+  fgfh:
+    steps:
+      - uses: cloudbees-io/snyk-sca-scan-dependency@v1
+        name: fg
+        kind: scan
         with:
           orgname: ashok.alogicfocus
           token: 79781dde-8b3d-45c6-9561-a2ebc1e9e18c
           language: LANGUAGE_JAVA
+          gh-secret-access-token: ${{ secrets.GITHUB_SECRET }}
