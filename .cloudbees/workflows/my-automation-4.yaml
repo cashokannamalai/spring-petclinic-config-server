@@ -19,25 +19,9 @@ jobs:
         kind: build
         run: mvn clean test
         shell: sh
-  hv:
-    steps:
-      - name: Check out source code
-        uses: cloudbees-io/checkout@v1
-      - name: Run TruffleHog secret scan on local source code
-        uses: cloudbees-io/trufflehog-secret-scan-code@v1
+      - name: Scan with GitHub Advanced Security
+        uses: cloudbees-io/github-security-sast-scan-code@v1
         with:
-          branch: ${{ cloudbees.scm.branch }}
-  sa:
-    steps:
-      - uses: cloudbees-io/checkout@v1
-        name: Check out source code
-      - uses: cloudbees-io/trufflehog-secret-scan-code@v1
-        name: te
-        kind: scan
-        with:
-          repoUrl: https://github.com/cashokannamalai/spring-petclinic-config-server.git
-          branch: main
           token: ${{ secrets.GITHUB_SECRET }}
-          path: .
-          since-commit: main
-          threshold-very-high: "10"
+          language: "LANGUAGE_JAVA"
+          branch-name: main
