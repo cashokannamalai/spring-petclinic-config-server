@@ -81,5 +81,5 @@ jobs:
         name: Publish test results
         kind: test
         with:
-         test-type: MSTest
-         folder-name: target/surefire-reports
+         test-type: junit  
+         folder-name: target/test-results  
