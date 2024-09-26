@@ -69,6 +69,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
+          branch-name: main
       - uses: cloudbees-io/sonarqube-sast-scan-code@v1
         name: Scan
         kind: scan
