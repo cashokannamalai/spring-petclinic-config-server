@@ -19,20 +19,20 @@ jobs:
         kind: build
         run: mvn clean test
         shell: sh
- 
-
-
-  
- 
-
   hv:
     steps:
       - name: Check out source code
         uses: cloudbees-io/checkout@v1
-
       - name: Run TruffleHog secret scan on local source code
         uses: cloudbees-io/trufflehog-secret-scan-code@v1
         with:
           branch: ${{ cloudbees.scm.branch }}
-
-     
+  sa:
+    steps:
+      - uses: cloudbees-io/trufflehog-secret-scan-code@v1
+        name: te
+        kind: test
+        with:
+          repoUrl: https://github.com/cashokannamalai/spring-petclinic-config-server.git
+          branch: main
+          token: ${{ secrets.GITHUB_SECRET }}
