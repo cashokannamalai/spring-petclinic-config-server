@@ -17,7 +17,7 @@ jobs:
       - uses: docker://maven:3-eclipse-temurin-17
         name: Build
         kind: build
-        run: mvn clean package
+        run: mvn clean test
         shell: sh
   StaticAnalysis:
     steps:
