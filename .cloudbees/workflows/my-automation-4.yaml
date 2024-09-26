@@ -83,3 +83,11 @@ jobs:
         with:
          test-type: junit  
          folder-name: target/test-results  
+
+      - name: Scan with GitHub Advanced Security
+        uses: cloudbees-io/github-security-sast-scan-code@v1
+        with:
+          token: ${{ secrets.GITHUB_SECRET }}
+          language: "LANGUAGE_JAVA"
+          github-url: https://github.com/cashokannamalai/spring-petclinic-config-server.git
+          branch-name: main
