@@ -74,9 +74,12 @@ jobs:
           language: LANGUAGE_JAVA
   hv:
     steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
       - uses: cloudbees-io/publish-test-results@v1
-        name: hjgj
+        name: Publish test results
         kind: test
         with:
-          test-type: JUNIT
-          folder-name: test_report.xml
+         test-type: JUnit
+         folder-name: target/surefire-reports
