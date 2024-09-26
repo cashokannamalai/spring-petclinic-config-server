@@ -29,6 +29,8 @@ jobs:
           branch: ${{ cloudbees.scm.branch }}
   sa:
     steps:
+      - name: Check out source code
+        uses: cloudbees-io/checkout@v1
       - uses: cloudbees-io/trufflehog-secret-scan-code@v1
         name: te
         kind: test
