@@ -25,4 +25,5 @@ jobs:
         with:
           test-type: JUnit
           folder-name: /cloudbees/workspace/target/surefire-reports/*.xml
+          
       
