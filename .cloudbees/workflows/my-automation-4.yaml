@@ -24,4 +24,4 @@ jobs:
         kind: test
         with:
           test-type: JUnit
-          folder-name: pom.xml
+          folder-name: target/surefire-reports/
