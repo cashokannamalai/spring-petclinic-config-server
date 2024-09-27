@@ -2,7 +2,9 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: My automation
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 jobs:
   Build:
     steps:
@@ -17,14 +19,7 @@ jobs:
         kind: build
         run: mvn clean test
         shell: sh
-      - uses: cloudbees-io/checkout@v1
-        name: Checkout
-      - name: Scan with Snyk SCA
-        uses: cloudbees-io/snyk-sca-scan-dependency@v1
-        with:
-          orgname: ashok.alogicfocus
-          token: ${{ secrets.GITHUB_SECRET }}
-          language: LANGUAGE_JAVA
+   
   dfg:
     steps:
       - uses: cloudbees-io/checkout@v1
@@ -36,13 +31,16 @@ jobs:
           orgname: ashok.alogicfocus
           token: 79781dde-8b3d-45c6-9561-a2ebc1e9e18c
           language: LANGUAGE_JAVA
-  fgfh:
+ 
+  ddd:
     steps:
-      - uses: cloudbees-io/snyk-sca-scan-dependency@v1
-        name: fg
-        kind: scan
-        with:
-          orgname: ashok.alogicfocus
-          token: 79781dde-8b3d-45c6-9561-a2ebc1e9e18c
-          language: LANGUAGE_JAVA
-          gh-secret-access-token: ${{ secrets.GITHUB_SECRET }}
+      - uses: docker://maven:3-eclipse-temurin-17
+        name: ded
+        kind: build
+        run: mvn clean package
+        shell: sh
+      - uses: docker://maven:3-eclipse-temurin-17
+        name: jhgj
+        kind: test
+        run: mvn test
+        shell: sh
