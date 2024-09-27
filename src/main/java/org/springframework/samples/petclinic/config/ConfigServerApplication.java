@@ -43,7 +43,7 @@ public class ConfigServerApplication {
 		Rox.register("default", flags);
 
 		// Setup connection with the feature management environment key
-		Rox.setup("aa61857a-0ca1-4e9d-4616-55e416873ce4").get();
+		Rox.setup("ca7d87ed-2a26-47e0-614c-a7b82d7e50bd").get();
 
 		// Check and print the value of the 'enableTutorial' flag
 		boolean isTutorialEnabled = flags.enableTutorial.isEnabled();
