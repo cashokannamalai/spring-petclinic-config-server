@@ -24,6 +24,7 @@ jobs:
     steps:
       - uses: cloudbees-io/checkout@v1
         name: Checkout
+
       - uses: cloudbees-io/snyk-sast-scan-code@v1
         name: fdf
         kind: scan
@@ -32,23 +33,9 @@ jobs:
           token: 79781dde-8b3d-45c6-9561-a2ebc1e9e18c
           language: LANGUAGE_JAVA
  
-  ddd:
-    steps:
-      - uses: cloudbees-io/checkout@v1
-        name: Checkout
-      - uses: docker://maven:3-eclipse-temurin-17
-        name: ded
-        kind: build
-        run: mvn clean package
-        shell: sh
-      - uses: docker://maven:3-eclipse-temurin-17
-        name: jhgj
-        kind: test
-        run: mvn test
-        shell: sh
 
       - name: Publish test results
         uses: cloudbees-io/publish-test-results@v1
         with:
-          test-type: Junit
-          folder-name: sample
+          test-type: JUnit
+          folder-name: target/surefire-reports
