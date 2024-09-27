@@ -46,3 +46,9 @@ jobs:
         kind: test
         run: mvn test
         shell: sh
+
+      - name: Publish test results
+        uses: cloudbees-io/publish-test-results@v1
+        with:
+          test-type: Junit
+          folder-name: sample/test
