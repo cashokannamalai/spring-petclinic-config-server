@@ -1,6 +1,6 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-name: My automation
+name: Config server
 on:
   push:
     branches:
@@ -30,13 +30,11 @@ jobs:
           fi
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-          
       - uses: docker://maven:3-eclipse-temurin-17
         name: Build
         kind: build
         run: mvn clean package
         shell: sh
-
       - name: RunUnitTest
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
@@ -74,28 +72,23 @@ jobs:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-        
       - name: Scan with GitHub Advanced Security
         uses: cloudbees-io/github-security-sast-scan-code@v1
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
-
-
       - name: Scan with SonarQube bundled
         uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
         with:
           sonar-exclusion: src/main/java
           cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
-          
       - uses: cloudbees-io/publish-test-results@v1
         name: Publish test results
         kind: test
         with:
           test-type: JUnit
           folder-name: /cloudbees/workspace/target/surefire-reports/*.xml
-          
       - name: Fetch SonarQube Issues
         id: FetchSonarQubeIssues
         uses: docker://alpine/git:latest
@@ -127,7 +120,7 @@ jobs:
             | ${{ steps.FetchSonarQubeIssues.outputs.CRITICAL_COUNT }} |
 
             | ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }} |
-            
+
             |  ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }} |
   ArtifactPublish:
     needs: Build
@@ -180,19 +173,17 @@ jobs:
         kind: deploy
         with:
           kustomization-base-dir: ${{ cloudbees.workspace }}/base
-
       - name: Get Ingress IP
         id: getIngressIP
         uses: docker://bitnami/kubectl:latest
         run: |
-         INGRESS_IP=$(kubectl get ingress configserver-ingress -n ashok -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-         echo "Ingress IP: $INGRESS_IP"
-         echo "ingress_ip=${INGRESS_IP}" >> $CLOUDBEES_OUTPUTS/ingress_ip
-
+          INGRESS_IP=$(kubectl get ingress configserver-ingress -n ashok -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+          echo "Ingress IP: $INGRESS_IP"
+          echo "ingress_ip=${INGRESS_IP}" >> $CLOUDBEES_OUTPUTS/ingress_ip
       - name: Publish Ingress IP Evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
-         content: |
-           ## Deployment Information
-            - **Ingress IP:** "${{ steps.getIngressIP.outputs.ingress_ip }}/config"
-            
+          content: |+
+            ## Deployment Information
+             - **Ingress IP:** "${{ steps.getIngressIP.outputs.ingress_ip }}/config"
+             
