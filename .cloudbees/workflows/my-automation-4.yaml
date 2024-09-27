@@ -51,4 +51,4 @@ jobs:
         uses: cloudbees-io/publish-test-results@v1
         with:
           test-type: Junit
-          folder-name: sample/test
+          folder-name: sample
