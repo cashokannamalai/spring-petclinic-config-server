@@ -24,4 +24,4 @@ jobs:
         kind: test
         with:
           test-type: JUnit
-          folder-name: target/surefire-reports/TEST-org.springframework.samples.petclinic.config.PetclinicConfigServerApplicationTests.xml
+          folder-name: /cloudbees/workspace/target/surefire-reports/*.xml
