@@ -1,50 +1,41 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-name: My automation
+name: Config server
 on:
   push:
     branches:
       - main
 jobs:
   Build:
+    outputs:
+      unitTestResults: ${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}
+      commit_id: ${{ steps.commitinfo.outputs.commit_id }}
+      commit_msg: ${{ steps.commitinfo.outputs.commit_msg }}
+      jira_key: ${{ steps.commitinfo.outputs.jira_key }}
     steps:
       - name: Configure git
         uses: docker://alpine/git:latest
         run: |
           git config --global --add safe.directory /cloudbees/workspace
-
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-
       - name: Get Commit Info
         uses: docker://alpine/git:latest
+        id: commitinfo
         run: |
           COMMIT_ID=$(git rev-parse HEAD)
           COMMIT_MSG=$(git log -1 --pretty=%B)
-
-          # Validate commit message to include JIRA issue key
-          if [[ ! "$COMMIT_MSG" =~ CBDEMO-125 ]]; then
-            echo "Error: Commit message must include the JIRA issue key CBDEMO-125." >&2
+          # Extract the JIRA issue key (assuming format like PROJECTKEY-123)
+          JIRA_KEY=$(echo "$COMMIT_MSG" | grep -oE "[A-Z]+-[0-9]+")
+          if [ -z "$JIRA_KEY" ]; then
+            echo "Error: Commit message must include a valid JIRA issue key." >&2
             exit 1
           fi
-
-          # Save commit info for the next steps
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-
-      - name: Fetch JIRA Metrics
-        uses: docker://alpine/curl:latest
-        run: |
-          JIRA_ISSUE_KEY="CBDEMO-125"
-          JIRA_API_URL="https://cloudbees.atlassian.net/rest/api/2/issue/${JIRA_ISSUE_KEY}"
-         
-
-          response=$(curl -s -u ${{ secrets.JIRA_USERNAME }}:${{ secrets.JIRA_API_TOKEN }} ${JIRA_API_URL})
-          echo "jira_response=${response}" >> $CLOUDBEES_OUTPUTS/jira_response
-
-      - name: Build
-        uses: docker://maven:3-eclipse-temurin-17
-        run: |
-          mvn clean install
-
-          
+          echo "jira_key=${JIRA_KEY}" >> $CLOUDBEES_OUTPUTS/jira_key
+      - uses: docker://maven:3-eclipse-temurin-17
+        name: Build
+        kind: build
+        run: mvn clean package
+        shell: sh
