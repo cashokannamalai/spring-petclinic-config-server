@@ -1,0 +1,6 @@
+projectKey=local
+serverUrl=http://localhost:8000
+serverVersion=10.3.0.82913
+dashboardUrl=http://localhost:8000/dashboard?id=local
+ceTaskId=
+ceTaskUrl=http://localhost:8000/api/ce/task?id=

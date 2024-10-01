@@ -1,6 +1,6 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-name: My automation
+name: Build_and_Deploy
 on:
   push:
     branches:
@@ -24,12 +24,17 @@ jobs:
         run: |
           COMMIT_ID=$(git rev-parse HEAD)
           COMMIT_MSG=$(git log -1 --pretty=%B)
+           if [[ ! "$COMMIT_MSG" =~ CBDEMO-134 ]]; then
+            echo "Error: Commit message must include the JIRA issue key CBDEMO-134." >&2
+            exit 1
+          fi
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
-      - name: Build
-        uses: docker://maven:3-eclipse-temurin-17
-        run: |
-          mvn clean install
+      - uses: docker://maven:3-eclipse-temurin-17
+        name: Build
+        kind: build
+        run: mvn clean package
+        shell: sh
       - name: RunUnitTest
         id: RunUnitTest
         uses: docker://maven:3-eclipse-temurin-17
@@ -65,41 +70,32 @@ jobs:
       MAJOR_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }}
       MINOR_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }}
     steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
       - name: Scan with GitHub Advanced Security
         uses: cloudbees-io/github-security-sast-scan-code@v1
         with:
           token: ${{ secrets.GITHUB_SECRET }}
           language: LANGUAGE_JAVA
-      - uses: cloudbees-io/sonarqube-sast-scan-code@v1
-        name: Scan
-        kind: scan
+      - name: Scan with SonarQube bundled
+        uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v1
         with:
-          server-url: https://sonarqube.cb-demos.io
-          username: ${{ secrets.username }}
-          password: ${{ secrets.password }}
-          language: Java
-      - uses: cloudbees-io/sonarqube-bundled-sast-scan-code@v2
-        name: Scan with Java
-        kind: scan
-        with:
-          language: JAVA
-      - uses: cloudbees-io/findsecbugs-sast-scan-code@v1
-        name: Scan with Find Security Bugs
-        kind: scan
-        with:
+          sonar-exclusion: src/main/java
+          cover-file-name: ./pom.xml
           language: LANGUAGE_JAVA
-      - uses: sbatchelder-cba/sonarqube-cba@v0.0.3
-        name: Scan GP
+      - uses: cloudbees-io/publish-test-results@v1
+        name: Publish test results
+        kind: test
         with:
-          project-key: config-server
-          token: ${{ secrets.token }}
+          test-type: JUnit
+          folder-name: /cloudbees/workspace/target/surefire-reports/*.xml
       - name: Fetch SonarQube Issues
         id: FetchSonarQubeIssues
         uses: docker://alpine/git:latest
         run: |
           apk add --no-cache curl jq
           curl -u ${{ secrets.username }}:${{ secrets.password }} \
-          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=config-server&severities=BLOCKER,CRITICAL,MAJOR" \
+          "https://sonarqube.cb-demos.io/api/issues/search?componentKeys=spring-petclinic-config-server&severities=BLOCKER,CRITICAL,MAJOR" \
           -o sonar-issues.json
           BLOCKER_COUNT=$(jq '[.issues[] | select(.severity=="BLOCKER")] | length' sonar-issues.json)
           CRITICAL_COUNT=$(jq '[.issues[] | select(.severity=="CRITICAL")] | length' sonar-issues.json)
@@ -120,8 +116,11 @@ jobs:
             |------------------------|
 
             |  ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }} |
+
             | ${{ steps.FetchSonarQubeIssues.outputs.CRITICAL_COUNT }} |
+
             | ${{ steps.FetchSonarQubeIssues.outputs.MAJOR_COUNT }} |
+
             |  ${{ steps.FetchSonarQubeIssues.outputs.MINOR_COUNT }} |
   ArtifactPublish:
     needs: Build
@@ -160,6 +159,8 @@ jobs:
   Deploy:
     needs: SmokeTest
     environment: production
+    outputs:
+      ingress_ip: ${{ steps.getIngressIP.outputs.ingress_ip }}
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
@@ -172,7 +173,17 @@ jobs:
         kind: deploy
         with:
           kustomization-base-dir: ${{ cloudbees.workspace }}/base
-
-          
-          
-  
+      - name: Get Ingress IP
+        id: getIngressIP
+        uses: docker://bitnami/kubectl:latest
+        run: |
+          INGRESS_IP=$(kubectl get ingress configserver-ingress -n ashok -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+          echo "Ingress IP: $INGRESS_IP"
+          echo "ingress_ip=${INGRESS_IP}" >> $CLOUDBEES_OUTPUTS/ingress_ip
+      - name: Publish Ingress IP Evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |+
+            ## Deployment Information
+             - **Ingress IP:** "${{ steps.getIngressIP.outputs.ingress_ip }}/config"
+             
