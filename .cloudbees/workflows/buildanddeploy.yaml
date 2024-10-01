@@ -1,6 +1,6 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-name: buildanddeploy
+name: build_and_deploy
 on:
   push:
     branches:
@@ -195,7 +195,7 @@ jobs:
       - name: Publish Ingress IP Evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
-          content: |
+          content: |+
             ## Deployment Information
              - **Ingress IP:** "${{ steps.getIngressIP.outputs.ingress_ip }}/config"
              
