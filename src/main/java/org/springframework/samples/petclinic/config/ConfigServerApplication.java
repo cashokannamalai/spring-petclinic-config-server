@@ -1,3 +1,4 @@
+/*
  * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,40 +15,53 @@
  */
 package org.springframework.samples.petclinic.config;
 
-
-import io.rollout.rox.server.Rox;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.config.server.EnableConfigServer;
-
-import java.util.concurrent.ExecutionException;
-
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 
 /**
+ * Main configuration server application.
+ * 
  * @author Maciej Szarlinski
  */
 @EnableConfigServer
 @SpringBootApplication
 public class ConfigServerApplication {
 
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigServerApplication.class, args);
+    }
 
-	private static final Logger log = LoggerFactory.getLogger(ConfigServerApplication.class);
+    @Configuration
+    public class SecurityConfig {
 
-	public static void main(String[] args) throws ExecutionException, InterruptedException {
-		SpringApplication.run(ConfigServerApplication.class, args);
-		Flags flags = new Flags();
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+            http
+                .authorizeRequests()
+                .anyRequest().authenticated()
+                .and()
+                .httpBasic();
+            return http.build();
+        }
 
-		// Register the flags container under a namespace
-		Rox.register("default", flags);
+        @Bean
+        public UserDetailsService userDetailsService() {
+            UserDetails user = User.withDefaultPasswordEncoder()
+                .username("admin")
+                .password("admin123")
+                .roles("ADMIN")
+                .build();
 
-		// Setup connection with the feature management environment key
-		Rox.setup("ca7d87ed-2a26-47e0-614c-a7b82d7e50bd").get();
-
-		// Check and print the value of the 'enableTutorial' flag
-		boolean isTutorialEnabled = flags.enableTutorial.isEnabled();
-		log.info("enableTutorial value is {}", isTutorialEnabled ? "true" : "false");
-
-	}
+            return new InMemoryUserDetailsManager(user);
+        }
+    }
 }
