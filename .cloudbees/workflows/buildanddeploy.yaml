@@ -68,6 +68,18 @@ jobs:
             - **JIRA Issue Key:** "${{ steps.commitinfo.outputs.jira_key }}"
             ## Unit Test Results
             - **Unit Test Results:** "${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}"
+
+      - name: SonarQube Scan
+        uses: docker://sonarsource/sonar-scanner-cli:latest
+        env:
+          SONAR_HOST_URL: https://sonarqube.cb-demos.io
+          SONAR_LOGIN: ${{ secrets.token }} 
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=spring-petclinic-config-server \
+            -Dsonar.sources=. \
+            -Dsonar.java.binaries=target \
+            -Dsonar.junit.reportPaths=target/surefire-reports \
   StaticAnalysis:
     outputs:
       BLOCKER_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }}
