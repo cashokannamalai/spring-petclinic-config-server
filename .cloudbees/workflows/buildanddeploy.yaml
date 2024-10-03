@@ -70,13 +70,7 @@ jobs:
             - **Unit Test Results:** "${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}"
 
 
-      - name: SonarQube Scan
-        uses: docker://maven:3-eclipse-temurin-17
-        run: |
-          mvn sonar:sonar \
-          -Dsonar.projectKey=spring-petclinic-config-server \
-          -Dsonar.host.url=${{ secrets.SONARQUBE_URL }} \
-          -Dsonar.login=${{ secrets.token }}
+      
 
      
          
@@ -113,6 +107,14 @@ jobs:
           orgname: ashok.alogicfocus
           token: 79781dde-8b3d-45c6-9561-a2ebc1e9e18c
           language: LANGUAGE_JAVA
+
+      - name: SonarQube Scan
+        uses: docker://maven:3-eclipse-temurin-17
+        run: |
+          mvn sonar:sonar \
+          -Dsonar.projectKey=spring-petclinic-config-server \
+          -Dsonar.host.url=${{ secrets.SONARQUBE_URL }} \
+          -Dsonar.login=${{ secrets.token }}
       - name: Fetch SonarQube Issues
         id: FetchSonarQubeIssues
         uses: docker://alpine/git:latest
