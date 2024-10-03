@@ -2,7 +2,7 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: build_and_deploy
 on:
-  push:
+  pull_request:
     branches:
       - main
 jobs:
@@ -68,12 +68,6 @@ jobs:
             - **JIRA Issue Key:** "${{ steps.commitinfo.outputs.jira_key }}"
             ## Unit Test Results
             - **Unit Test Results:** "${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}"
-
-
-      
-
-     
-         
   StaticAnalysis:
     outputs:
       BLOCKER_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }}
@@ -107,7 +101,6 @@ jobs:
           orgname: ashok.alogicfocus
           token: 79781dde-8b3d-45c6-9561-a2ebc1e9e18c
           language: LANGUAGE_JAVA
-
       - name: SonarQube Scan
         uses: docker://maven:3-eclipse-temurin-17
         run: |
