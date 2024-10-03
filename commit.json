@@ -1,0 +1,14 @@
+{
+  "commit": {
+    "id": "5e37e34c80e6170f1310ae5b1321ef3cd68001c3",
+    "message": "MAjor"
+  },
+  "sonarqube_metrics": {
+    "severity_counts": {
+      "Blocker": 0,
+      "Critical": 0,
+      "Major": 0,
+      "Minor": 0
+    }
+  }
+}

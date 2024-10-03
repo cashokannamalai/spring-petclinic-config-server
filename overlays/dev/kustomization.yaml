@@ -1,0 +1,58 @@
+resources:
+  - ../../base
+
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: configserver-deployment
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: configserver-deployment
+      spec:
+        template:
+          spec:
+            containers:
+              - name: configserver
+                image: caannamalai/configserver:staging
+
+  - target:
+      group: ""
+      version: v1
+      kind: Service
+      name: configserver-service
+    patch: |-
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: configserver-service
+      spec:
+        ports:
+          - port: 8888
+            targetPort: 8888
+
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: configserver-ingress
+    patch: |-
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: configserver-ingress
+      spec:
+        rules:
+          - host:
+            http:
+              paths:
+                - path: /config
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: configserver-service
+                      port:
+                        number: 8888

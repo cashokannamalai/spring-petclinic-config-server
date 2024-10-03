@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: configserver-deployment
+spec:
+  template:
+    spec:
+      containers:
+        - name: configserver
+          image: caannamalai/configserver:3.2.4
