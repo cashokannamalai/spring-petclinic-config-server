@@ -82,7 +82,7 @@ jobs:
             -Dsonar.sources=. \
             -Dsonar.java.binaries=target \
             -Dsonar.junit.reportPaths=target/surefire-reports \
-            -Dsonar.java.libraries=target/dependency/*.jar \
+            -Dsonar.java.libraries=target/*.jar \
             -Dsonar.login=$SONAR_LOGIN \
             -Dsonar.password=$SONAR_PASSWORD
             -Dsonar.login=$SONAR_TOKEN
