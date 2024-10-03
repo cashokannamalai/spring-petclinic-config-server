@@ -69,23 +69,17 @@ jobs:
             ## Unit Test Results
             - **Unit Test Results:** "${{ steps.RunUnitTest.outputs.mvn_test_stdio1 }}"
 
+
       - name: SonarQube Scan
-        uses: docker://sonarsource/sonar-scanner-cli:latest
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONARQUBE_URL }} 
-          SONAR_LOGIN: ${{ secrets.username }}   
-          SONAR_PASSWORD: ${{ secrets.password }}
-          SONAR_TOKEN: ${{ secrets.token }}
+        uses: docker://maven:3-eclipse-temurin-17
         run: |
-          sonar-scanner \
-            -Dsonar.projectKey=spring-petclinic-config-server \
-            -Dsonar.sources=. \
-            -Dsonar.java.binaries=target \
-            -Dsonar.junit.reportPaths=target/surefire-reports \
-            -Dsonar.java.libraries=target/*.jar \
-            -Dsonar.login=$SONAR_LOGIN \
-            -Dsonar.password=$SONAR_PASSWORD
-            -Dsonar.login=$SONAR_TOKEN
+          mvn sonar:sonar \
+          -Dsonar.projectKey=spring-petclinic-config-server \
+          -Dsonar.host.url=${{ secrets.SONARQUBE_URL }} \
+          -Dsonar.login=${{ secrets.token }}
+
+     
+         
   StaticAnalysis:
     outputs:
       BLOCKER_COUNT: ${{ steps.FetchSonarQubeIssues.outputs.BLOCKER_COUNT }}
