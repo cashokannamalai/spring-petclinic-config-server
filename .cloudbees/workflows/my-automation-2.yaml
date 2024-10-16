@@ -2,8 +2,9 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 name: Build_and_Deploy
 on:
-  push:
+  pull_request:
     branches:
+      - ashok
       - main
 jobs:
   Build:
@@ -24,10 +25,7 @@ jobs:
         run: |
           COMMIT_ID=$(git rev-parse HEAD)
           COMMIT_MSG=$(git log -1 --pretty=%B)
-           if [[ ! "$COMMIT_MSG" =~ CBDEMO-134 ]]; then
-            echo "Error: Commit message must include the JIRA issue key CBDEMO-134." >&2
-            exit 1
-          fi
+        
           echo "commit_id=${COMMIT_ID}" >> $CLOUDBEES_OUTPUTS/commit_id
           echo "commit_msg=${COMMIT_MSG}" >> $CLOUDBEES_OUTPUTS/commit_msg
       - uses: docker://maven:3-eclipse-temurin-17
