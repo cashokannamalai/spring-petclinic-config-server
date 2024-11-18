@@ -10,5 +10,3 @@ spring:
           default-label: main
         native:
           search-locations: file:///${GIT_REPO}
-
-roxKey: "${ROX_KEY}"
