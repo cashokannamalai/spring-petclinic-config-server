@@ -71,25 +71,25 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.0.10</version>
+            <version>6.1.14</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
-            <version>6.0.10</version>
+            <version>6.1.14</version>
         </dependency>
 
          <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-security</artifactId>
-        <version>3.3.3</version>
+        <version>3.3.5</version>
     </dependency>
 
     <!-- Optionally, if you're using Spring Web -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
-        <version>3.3.3</version>
+        <version>3.4.0</version>
     </dependency>
 
         <!-- Third-party libraries -->
