@@ -82,14 +82,14 @@
          <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-security</artifactId>
-        <version>3.3.3</version>
+        <version>3.3.7</version>
     </dependency>
 
     <!-- Optionally, if you're using Spring Web -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
-        <version>3.3.3</version>
+        <version>3.3.7</version>
     </dependency>
 
         <!-- Third-party libraries -->
